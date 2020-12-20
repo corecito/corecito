@@ -67,7 +67,7 @@ async def main():
     logger.info(f'\n\n>>> Selling: {tx_result:.6f} {base_currency} at {buy_price} to park an excess of {excess:.6f} {core_number_currency}\n')
     # Sell excess BTC => Buy ETH
     if (not safe_mode_on):
-      await account.buy_market(cro.pairs.ETH_BTC, excess)
+      await account.buy_market(pair, excess)
 
   elif coreNumberDecreased(core_number, deviated_core_number):
     logger.info(f'Decreased {decrease_percentage:.2f}% - missing {missing:.6f} {core_number_currency} denominated in {base_currency}')
