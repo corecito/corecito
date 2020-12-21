@@ -10,9 +10,11 @@ CRYPTOCOM_API_KEY = "MY_KEY"
 CRYPTOCOM_API_SECRET = "MY_SECRET"
 
 DEFAULT_CORE_NUMBER = 2 # Ethers
+MAX_DECIMALS_BUY = 6 # This is the limit Crypto.com has on ETH_BTC pair https://crypto.com/exchange/trade/spot/ETH_BTC
+MAX_DECIMALS_SELL = 3 # This is the limit Crypto.com has on ETH_BTC pair https://crypto.com/exchange/trade/spot/ETH_BTC
 
 async def main():
-  safe_mode_on = True # Set to False to enable trading, True just prints to the console log what it would do
+  safe_mode_on = False # Set to False to enable trading, True just prints to the console log what it would do
   logger = setupLogger('logfile.log')
   exchange = cro.Exchange()
   account = cro.Account(api_key=CRYPTOCOM_API_KEY, api_secret=CRYPTOCOM_API_SECRET)
@@ -53,9 +55,9 @@ async def main():
   logger.info(f'Core number adjustments')
   logger.info(f'Core number: {core_number} {core_number_currency}')
   logger.info(f'Deviated Core number:{deviated_core_number:.6f} {core_number_currency}')
-  excess = deviated_core_number - core_number
+  excess = round(deviated_core_number - core_number, MAX_DECIMALS_BUY)
   increase_percentage = excess * 100 / core_number
-  missing = core_number - deviated_core_number
+  missing = round(core_number - deviated_core_number, MAX_DECIMALS_SELL)
   decrease_percentage = missing * 100 / core_number
 
   if coreNumberExploded(core_number, deviated_core_number):
@@ -63,11 +65,11 @@ async def main():
 
   elif coreNumberIncreased(core_number, deviated_core_number):
     logger.info(f'Increased {increase_percentage:.2f}% - excess of {excess:.6f} {core_number_currency} denominated in {base_currency}')
-    tx_result = excess * buy_price
+    tx_result = round(excess * buy_price, MAX_DECIMALS_BUY)
     logger.info(f'\n\n>>> Selling: {tx_result:.6f} {base_currency} at {buy_price} to park an excess of {excess:.6f} {core_number_currency}\n')
-    # Sell excess BTC => Buy ETH
+    # Sell excess BTC => Market Sell for ETH_BTC is denominated in BTC!!!
     if (not safe_mode_on):
-      await account.buy_market(pair, excess)
+      await account.buy_market(pair, tx_result)
 
   elif coreNumberDecreased(core_number, deviated_core_number):
     logger.info(f'Decreased {decrease_percentage:.2f}% - missing {missing:.6f} {core_number_currency} denominated in {base_currency}')
