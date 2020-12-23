@@ -1,0 +1,16 @@
+---  # default config
+
+# API
+cryptocom_api_key: <your Crypto.com Exchange API key here>
+cryptocom_api_secret: <your Crypto.com Exchange API private key here>
+
+# CORE NUMBER
+core_number: 2 # Ethers
+max_decimals_buy: 6 # This is the limit Crypto.com has on ETH_BTC pair https://crypto.com/exchange/trade/spot/ETH_BTC
+max_decimals_sell: 3
+trading_pair: ETH_BTC # This must be one of the pairs listed in https://github.com/goincrypto/cryptocom-exchange/blob/master/src/cryptocom/exchange/pairs.py
+core_number_currency: ETH # this must be one of the currencies listed in https://github.com/goincrypto/cryptocom-exchange/blob/master/src/cryptocom/exchange/coins.py
+base_currency: BTC # this must be one of the currencies listed in https://github.com/goincrypto/cryptocom-exchange/blob/master/src/cryptocom/exchange/coins.py
+
+# SAFE MODE (True => no real trades will be made; False => real trades will be made)
+safe_mode_on: True
