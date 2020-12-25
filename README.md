@@ -12,7 +12,7 @@ pip install import yaml
 
 ## Config
 
-Duplicate the "default_config.yaml" file in config/. Rename it as "user_config.yaml" and add there your API keys and set the other values as you wish. Be careful! -> Do not set your API keys in default_config.yaml and push the file to git!
+Duplicate "config/default_config.yaml" file. Rename it as "user_config.yaml" and add there your API keys and set the other values as you wish. Be careful! -> Do not set your API keys in default_config.yaml and push the file to git!
 
 ## Known issues
 
