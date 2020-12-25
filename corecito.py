@@ -27,8 +27,11 @@ async def main():
   cro_coin_base_currency = eval('cro.coins.' + config['base_currency'])
   core_number_currency = config['core_number_currency']
   cro_coin_core_number_currency = eval('cro.coins.' + config['core_number_currency'])
+  iteration = 0
 
   while True:
+    iteration += 1
+    print(f'------------ Iteration {iteration} ------------')
     # Get BTC/ETH ticker info
     tickers = await exchange.get_tickers()
     ticker = tickers[pair]
@@ -93,13 +96,16 @@ async def main():
 
     # Update balances after adjusting to core number
     balances = await account.get_balance()
-    logger.info(f'Final {base_currency} available:{balances[cro_coin_base_currency].available} - {core_number_currency} available:{balances[cro_coin_core_number_currency].available}\n')
+    logger.info(f'Final {base_currency} available:{balances[cro_coin_base_currency].available} - {core_number_currency} available:{balances[cro_coin_core_number_currency].available}')
 
+    # Loop end
+    print(f'------------ Iteration {iteration} ------------\n')
     if config['test_mode_on']:
       await asyncio.sleep(1)
       break
     else:
       # Wait given seconds until next poll
+      logger.info("Waiting for next iteration... ({} seconds)\n\n\n".format(config['seconds_between_iterations']))
       await asyncio.sleep(config['seconds_between_iterations'])
 
 
@@ -108,7 +114,7 @@ def get_config():
   config_path = "config/default_config.yaml"
   if exists("config/user_config.yaml"):
     config_path = "config/user_config.yaml"
-    print('Detected user configuration...')
+    print('\n\nDetected user configuration...\n')
   else:
     print('Loading default configuration...')
   config_file = open(config_path)
