@@ -12,4 +12,8 @@ pip install import yaml
 
 ## Config
 
-Duplicate the "default_config.yaml" file in config/. Rename it as "user_config.yaml" and add there your API keys and set the other values as you wish. Be careful! -> Do not set your API keys in default_config.yaml and then push the file to git!
+Duplicate the "default_config.yaml" file in config/. Rename it as "user_config.yaml" and add there your API keys and set the other values as you wish. Be careful! -> Do not set your API keys in default_config.yaml and push the file to git!
+
+## Known issues
+
+* INVALID_NONCE On All Requests: the issue occurs when the system clock of the client machine is greater than 1 second in the future, or 30 seconds in the past. Usually, re-syncing with the NTP time server on the client machine will correct the issue.
