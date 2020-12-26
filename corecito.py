@@ -85,7 +85,7 @@ async def main():
       logger.info(f'> Plummeted {decrease_percentage:.2f}%\nConsider updating CoreNumber to {deviated_core_number:.6f}')
 
     else:
-      logger.info(f'> Price is rock-solid stable')
+      logger.info(f'> Price is rock-solid stable ({increase_percentage:.2f}%)')
 
     # Update balances after adjusting to core number
     balances = await account.get_balance()
