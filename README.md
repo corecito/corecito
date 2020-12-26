@@ -6,8 +6,8 @@
 *To run this project, you may need to install the following python modules:
 
 ```
-pip install cryptocom.exchange
-pip install import yaml
+pip3 install cryptocom.exchange
+pip3 install yaml
 ```
 
 ## Config
