@@ -12,7 +12,10 @@ pip3 install yaml
 
 ## Config
 
-Duplicate "config/default_config.yaml" file. Rename it as "user_config.yaml" and add there your API keys and set the other values as you wish. Be careful! -> Do not set your API keys in default_config.yaml and push the file to git!
+1. Duplicate "config/default_config.yaml" file
+2. Rename it as "user_config.yaml" and add there your API keys and set the other values as you wish
+
+Be careful! -> Do not set your API keys in default_config.yaml and push the file to git!
 
 ## Known issues
 
