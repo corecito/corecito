@@ -39,13 +39,13 @@ async def main():
     # time=1608466157, volume=10596.948,
     # high=0.028549, low=0.027439, change=-0.001)
 
-    # Get my BTC balance
+    # Get my base currency balance
     balances = await account.get_balance()
     base_currency_balance = balances[cro_coin_base_currency]
     base_currency_available = base_currency_balance.available
     # EXAMPLE BTC_balance:Balance(total=0.04140678, available=3.243e-05, in_orders=0.04137435, in_stake=0, coin=Coin(name='BTC'))
 
-    # Get my ETH balance
+    # Get my Core Number currency balance
     core_number_currency_balance = balances[cro_coin_core_number_currency]
 
     logger.info(f'Balances\n(Base) {base_currency} balance:{base_currency_balance} \n(Core) {core_number_currency} balance:{core_number_currency_balance}\n')
@@ -69,7 +69,7 @@ async def main():
       logger.info(f'Increased {increase_percentage:.2f}% - excess of {excess:.6f} {core_number_currency} denominated in {base_currency}')
       tx_result = round(excess * buy_price, config['max_decimals_buy'])
       logger.info(f'\n\n>>> Selling: {tx_result:.6f} {base_currency} at {buy_price} to park an excess of {excess:.6f} {core_number_currency}\n')
-      # Sell excess BTC => Market Sell for ETH_BTC is denominated in BTC!!!
+      # Sell excess of base currency ie. => Market Sell for ETH_BTC is denominated in BTC!!!
       if (not config['safe_mode_on']):
         await account.buy_market(pair, tx_result)
 
@@ -77,7 +77,7 @@ async def main():
       logger.info(f'Decreased {decrease_percentage:.2f}% - missing {missing:.6f} {core_number_currency} denominated in {base_currency}')
       tx_result = missing * sell_price
       logger.info(f'\n\n>>> Buying: {tx_result:.6f} {base_currency} at {buy_price} taking {missing:.6f} {core_number_currency} from reserves\n')
-      # Buy missing BTC => Sell ETH
+      # Buy missing base currency; ie. => in ETH_BTC pair, buy missing BTC => Sell ETH
       if (not config['safe_mode_on']):
         await account.sell_market(pair, missing)
 
