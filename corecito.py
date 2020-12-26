@@ -9,13 +9,6 @@ import cryptocom.exchange as cro
 from cryptocom.exchange.structs import Pair
 from cryptocom.exchange.structs import PrivateTrade
 
-# CRYPTOCOM_API_KEY = "MY_KEY"
-# CRYPTOCOM_API_SECRET = "MY_SECRET"
-#
-# DEFAULT_CORE_NUMBER = 2 # Ethers
-# config['max_decimals_buy'] = 6 # This is the limit Crypto.com has on ETH_BTC pair https://crypto.com/exchange/trade/spot/ETH_BTC
-# config['max_decimals_sell'] = 3 # This is the limit Crypto.com has on ETH_BTC pair https://crypto.com/exchange/trade/spot/ETH_BTC
-
 async def main():
   config = get_config()
   logger = setupLogger('logfile.log')
