@@ -23,84 +23,89 @@ async def main():
   iteration = 0
 
   while True:
-    iteration += 1
-    print(f'------------ Iteration {iteration} ------------')
-    # Get BTC/ETH ticker info
-    tickers = await exchange.get_tickers()
-    ticker = tickers[pair]
-    buy_price = ticker.buy_price
-    sell_price = ticker.sell_price
-    high = ticker.high
-    low = ticker.low
-    logger.info(f'\nMarket {pair.name}\nbuy price: {buy_price} - sell price: {sell_price} <> low: {low} - high: {high}\n')
+    try:
+      iteration += 1
+      print(f'------------ Iteration {iteration} ------------')
+      # Get BTC/ETH ticker info
+      tickers = await exchange.get_tickers()
+      ticker = tickers[pair]
+      buy_price = ticker.buy_price
+      sell_price = ticker.sell_price
+      high = ticker.high
+      low = ticker.low
+      logger.info(f'\nMarket {pair.name}\nbuy price: {buy_price} - sell price: {sell_price} <> low: {low} - high: {high}\n')
 
-    # EXAMPLE ticker = MarketTicker(pair=Pair(name='ETH_BTC'),
-    # buy_price=0.027638, sell_price=0.027641, trade_price=0.027641,
-    # time=1608466157, volume=10596.948,
-    # high=0.028549, low=0.027439, change=-0.001)
+      # EXAMPLE ticker = MarketTicker(pair=Pair(name='ETH_BTC'),
+      # buy_price=0.027638, sell_price=0.027641, trade_price=0.027641,
+      # time=1608466157, volume=10596.948,
+      # high=0.028549, low=0.027439, change=-0.001)
 
-    # Get my base currency balance
-    balances = await account.get_balance()
-    base_currency_balance = balances[cro_coin_base_currency]
-    base_currency_available = base_currency_balance.available
-    # EXAMPLE BTC_balance:Balance(total=0.04140678, available=3.243e-05, in_orders=0.04137435, in_stake=0, coin=Coin(name='BTC'))
+      # Get my base currency balance
+      balances = await account.get_balance()
+      base_currency_balance = balances[cro_coin_base_currency]
+      base_currency_available = base_currency_balance.available
+      # EXAMPLE BTC_balance:Balance(total=0.04140678, available=3.243e-05, in_orders=0.04137435, in_stake=0, coin=Coin(name='BTC'))
 
-    # Get my Core Number currency balance
-    core_number_currency_balance = balances[cro_coin_core_number_currency]
+      # Get my Core Number currency balance
+      core_number_currency_balance = balances[cro_coin_core_number_currency]
 
-    logger.info(f'Balances\n(Base) {base_currency} balance:{base_currency_balance} \n(Core) {core_number_currency} balance:{core_number_currency_balance}\n')
+      logger.info(f'Balances\n(Base) {base_currency} balance:{base_currency_balance} \n(Core) {core_number_currency} balance:{core_number_currency_balance}\n')
 
-    ###########################
-    # Core Number Adjustments #
-    ###########################
-    deviated_core_number = base_currency_available / buy_price
-    logger.info(f'Core number adjustments')
-    logger.info(f'Core number: {core_number} {core_number_currency}')
-    logger.info(f'Deviated Core number:{deviated_core_number:.6f} {core_number_currency}')
-    excess = round(deviated_core_number - core_number, config['max_decimals_buy'])
-    increase_percentage = excess * 100 / core_number
-    missing = round(core_number - deviated_core_number, config['max_decimals_sell'])
-    decrease_percentage = missing * 100 / core_number
+      ###########################
+      # Core Number Adjustments #
+      ###########################
+      deviated_core_number = base_currency_available / buy_price
+      logger.info(f'Core number adjustments')
+      logger.info(f'Core number: {core_number} {core_number_currency}')
+      logger.info(f'Deviated Core number:{deviated_core_number:.6f} {core_number_currency}')
+      excess = round(deviated_core_number - core_number, config['max_decimals_buy'])
+      increase_percentage = excess * 100 / core_number
+      missing = round(core_number - deviated_core_number, config['max_decimals_sell'])
+      decrease_percentage = missing * 100 / core_number
 
-    if coreNumberExploded(core_number, deviated_core_number, config['max_core_number_increase_percentage']):
-      logger.info(f'> Exploded {increase_percentage:.2f}%\nConsider updating CoreNumber to {deviated_core_number:.6f}')
+      if coreNumberExploded(core_number, deviated_core_number, config['max_core_number_increase_percentage']):
+        logger.info(f'> Exploded {increase_percentage:.2f}%\nConsider updating CoreNumber to {deviated_core_number:.6f}')
 
-    elif coreNumberIncreased(core_number, deviated_core_number, config['min_core_number_increase_percentage'], config['max_core_number_increase_percentage']):
-      logger.info(f'Increased {increase_percentage:.2f}% - excess of {excess:.6f} {core_number_currency} denominated in {base_currency}')
-      tx_result = round(excess * buy_price, config['max_decimals_buy'])
-      logger.info(f'\n\n>>> Selling: {tx_result:.6f} {base_currency} at {buy_price} to park an excess of {excess:.6f} {core_number_currency}\n')
-      # Sell excess of base currency ie. => Market Sell for ETH_BTC is denominated in BTC!!!
-      if (not config['safe_mode_on']):
-        await account.buy_market(pair, tx_result)
+      elif coreNumberIncreased(core_number, deviated_core_number, config['min_core_number_increase_percentage'], config['max_core_number_increase_percentage']):
+        logger.info(f'Increased {increase_percentage:.2f}% - excess of {excess:.6f} {core_number_currency} denominated in {base_currency}')
+        tx_result = round(excess * buy_price, config['max_decimals_buy'])
+        logger.info(f'\n\n>>> Selling: {tx_result:.6f} {base_currency} at {buy_price} to park an excess of {excess:.6f} {core_number_currency}\n')
+        # Sell excess of base currency ie. => Market Sell for ETH_BTC is denominated in BTC!!!
+        if (not config['safe_mode_on']):
+          await account.buy_market(pair, tx_result)
 
-    elif coreNumberDecreased(core_number, deviated_core_number, config['min_core_number_decrease_percentage'], config['max_core_number_decrease_percentage']):
-      logger.info(f'Decreased {decrease_percentage:.2f}% - missing {missing:.6f} {core_number_currency} denominated in {base_currency}')
-      tx_result = missing * sell_price
-      logger.info(f'\n\n>>> Buying: {tx_result:.6f} {base_currency} at {buy_price} taking {missing:.6f} {core_number_currency} from reserves\n')
-      # Buy missing base currency; ie. => in ETH_BTC pair, buy missing BTC => Sell ETH
-      if (not config['safe_mode_on']):
-        await account.sell_market(pair, missing)
+      elif coreNumberDecreased(core_number, deviated_core_number, config['min_core_number_decrease_percentage'], config['max_core_number_decrease_percentage']):
+        logger.info(f'Decreased {decrease_percentage:.2f}% - missing {missing:.6f} {core_number_currency} denominated in {base_currency}')
+        tx_result = missing * sell_price
+        logger.info(f'\n\n>>> Buying: {tx_result:.6f} {base_currency} at {buy_price} taking {missing:.6f} {core_number_currency} from reserves\n')
+        # Buy missing base currency; ie. => in ETH_BTC pair, buy missing BTC => Sell ETH
+        if (not config['safe_mode_on']):
+          await account.sell_market(pair, missing)
 
-    elif coreNumberPlummeted(core_number, deviated_core_number, config['max_core_number_decrease_percentage']):
-      logger.info(f'> Plummeted {decrease_percentage:.2f}%\nConsider updating CoreNumber to {deviated_core_number:.6f}')
+      elif coreNumberPlummeted(core_number, deviated_core_number, config['max_core_number_decrease_percentage']):
+        logger.info(f'> Plummeted {decrease_percentage:.2f}%\nConsider updating CoreNumber to {deviated_core_number:.6f}')
 
-    else:
-      logger.info(f'> Price is rock-solid stable ({increase_percentage:.2f}%)')
+      else:
+        logger.info(f'> Price is rock-solid stable ({increase_percentage:.2f}%)')
 
-    # Update balances after adjusting to core number
-    balances = await account.get_balance()
-    logger.info(f'Final {base_currency} available:{balances[cro_coin_base_currency].available} - {core_number_currency} available:{balances[cro_coin_core_number_currency].available}')
+      # Update balances after adjusting to core number
+      balances = await account.get_balance()
+      logger.info(f'Final {base_currency} available:{balances[cro_coin_base_currency].available} - {core_number_currency} available:{balances[cro_coin_core_number_currency].available}')
 
-    # Loop end
-    print(f'------------ Iteration {iteration} ------------\n')
-    if config['test_mode_on']:
-      await asyncio.sleep(1)
-      break
-    else:
-      # Wait given seconds until next poll
-      logger.info("Waiting for next iteration... ({} seconds)\n\n\n".format(config['seconds_between_iterations']))
-      await asyncio.sleep(config['seconds_between_iterations'])
+      # Loop end
+      print(f'------------ Iteration {iteration} ------------\n')
+      if config['test_mode_on']:
+        await asyncio.sleep(1)
+        break
+      else:
+        # Wait given seconds until next poll
+        logger.info("Waiting for next iteration... ({} seconds)\n\n\n".format(config['seconds_between_iterations']))
+        await asyncio.sleep(config['seconds_between_iterations'])
 
+    except Exception as e:
+        # Network issue(s) occurred (most probably). Jumping to next iteration
+        logger.info("Exception occurred -> '{}'. Waiting for next iteration... ({} seconds)\n\n\n".format(e, config['seconds_between_iterations']))
+        await asyncio.sleep(config['seconds_between_iterations'])
 
 
 def get_config():
