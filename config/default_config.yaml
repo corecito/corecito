@@ -1,28 +1,32 @@
 ---  # default config
 
-# API
-cryptocom_api_key: <your Crypto.com Exchange API key here>
-cryptocom_api_secret: <your Crypto.com Exchange API secret here>
-binance_api_key: <your Binance Exchange API key here>
-binance_api_secret: <your Binance Exchange API secret here>
+# EXCHANGE (Select which exchange you want to run Corecito on. Possible values -> 'crypto.com' or 'binance')
+corecito_exchange: crypto.com
 
-# CORE NUMBER
+# API
+api_key: <your Crypto.com Exchange or Binance API key here>
+api_secret: <your Crypto.com Exchange or Binance API secret here>
+
+# CORE NUMBER SETTINGS
 core_number: 2 # Ethers
 max_decimals_buy: 6 # This is the limit Crypto.com has on ETH_BTC pair https://crypto.com/exchange/trade/spot/ETH_BTC
 max_decimals_sell: 3
-trading_pair: ETH_BTC # This must be one of the pairs listed in https://github.com/goincrypto/cryptocom-exchange/blob/master/src/cryptocom/exchange/pairs.py
-binance_trading_pair: ETHBTC # This must be one of the pairs listed in Binance
-core_number_currency: ETH # this must be one of the currencies listed in https://github.com/goincrypto/cryptocom-exchange/blob/master/src/cryptocom/exchange/coins.py
-base_currency: BTC # this must be one of the currencies listed in https://github.com/goincrypto/cryptocom-exchange/blob/master/src/cryptocom/exchange/coins.py
 min_core_number_increase_percentage: 3
 max_core_number_increase_percentage: 10
 min_core_number_decrease_percentage: 3
 max_core_number_decrease_percentage: 10
 
+# EXCHANGE SETTINGS
+cryptocom_trading_pair: ETH_BTC # This must be one of the pairs listed in https://github.com/goincrypto/cryptocom-exchange/blob/master/src/cryptocom/exchange/pairs.py
+cryptocom_core_number_currency: ETH # this must be one of the currencies listed in https://github.com/goincrypto/cryptocom-exchange/blob/master/src/cryptocom/exchange/coins.py
+cryptocom_base_currency: BTC # this must be one of the currencies listed in https://github.com/goincrypto/cryptocom-exchange/blob/master/src/cryptocom/exchange/coins.py
+binance_trading_pair: ETHBTC # This must be one of the pairs listed in Binance
+binance_core_number_currency: ETH # # This must be one of the coins listed in Binance
+binance_base_currency: BTC # # This must be one of the coins listed in Binance
+
 # CORECITO MODES
 safe_mode_on: True # True => no real trades will be made; False => real trades will be made
 test_mode_on: True # (True => Corecito will run just once ; False => Corecito will run forever until stopped)
-binance_test_mode_on: True # (True => Corecito will run just once ; False => Corecito will run forever until stopped)
 
 # LOOP SETTINGS
 seconds_between_iterations: 5
