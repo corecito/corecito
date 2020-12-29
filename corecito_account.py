@@ -76,16 +76,16 @@ class CorecitoAccount:
             'core_number_currency_balance': core_number_currency_balance,
             'core_number_currency_available': core_number_currency_available})
 
-  async def order_market_buy(self, quantity=0.0):
+  async def order_market_buy(self, tx_result, quantity=0.0):
     if self.exchange == 'crypto.com':
-      await self.account.buy_market(self.pair, quantity)
+      await self.account.buy_market(self.pair, tx_result)
     elif self.exchange == 'binance':
       self.account.order_market_buy(symbol=self.pair, quantity=quantity)
       asyncio.sleep(0.5)
 
-  async def order_market_sell(self, quantity=0.0):
+  async def order_market_sell(self, tx_result, quantity=0.0):
     if self.exchange == 'crypto.com':
-      await self.account.sell_market(self.pair, quantity)
+      await self.account.sell_market(self.pair, tx_result)
     elif self.exchange == 'binance':
       self.account.order_market_sell(symbol=self.pair, quantity=quantity)
       asyncio.sleep(0.5)

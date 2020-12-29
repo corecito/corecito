@@ -67,7 +67,7 @@ async def main():
         logger.info(f'\n\n>>> Selling: {tx_result:.6f} {account.base_currency} at {buy_price} to park an excess of {excess:.6f} {account.core_number_currency}\n')
         # Sell excess of base currency ie. => in ETH_BTC pair, sell excess BTC => Buy ETH
         if (not config['safe_mode_on']):
-          await account.order_market_buy(quantity=excess)
+          await account.order_market_buy(tx_result, excess)
           #account.order_market_buy(symbol=pair, quantity=excess)
 
       elif coreNumberDecreased(account.core_number, deviated_core_number, account.min_core_number_decrease_percentage, account.max_core_number_decrease_percentage):
@@ -76,7 +76,7 @@ async def main():
         logger.info(f'\n\n>>> Buying: {tx_result:.6f} {account.base_currency} at {buy_price} taking {missing:.6f} {account.core_number_currency} from reserves\n')
         # Buy missing base currency; ie. => in ETH_BTC pair, buy missing BTC => Sell ETH
         if (not config['safe_mode_on']):
-          await account.order_market_sell(quantity=missing)
+          await account.order_market_sell(tx_result, missing)
           #account.order_market_sell(symbol=pair, quantity=missing)
 
       elif coreNumberPlummeted(account.core_number, deviated_core_number, account.max_core_number_decrease_percentage):
