@@ -6,6 +6,7 @@ import yaml
 import sys
 import traceback
 from os.path import exists
+import cryptocom.exchange as cro
 from corecito_account import CorecitoAccount
 
 async def main():
