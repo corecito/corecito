@@ -6,10 +6,6 @@ import yaml
 import sys
 import traceback
 from os.path import exists
-from binance.client import Client
-import cryptocom.exchange as cro
-from cryptocom.exchange.structs import Pair
-from cryptocom.exchange.structs import PrivateTrade
 from corecito_account import CorecitoAccount
 
 async def main():

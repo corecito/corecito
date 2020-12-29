@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 import asyncio
 import time
-import logging
-import yaml
-import sys
-from os.path import exists
 import cryptocom.exchange as cro
 from cryptocom.exchange.structs import Pair
 from cryptocom.exchange.structs import PrivateTrade
