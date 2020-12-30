@@ -7,6 +7,7 @@
 
 ```
 pip3 install cryptocom.exchange
+pip3 install python-binance
 pip3 install yaml
 ```
 
