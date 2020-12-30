@@ -76,7 +76,7 @@ async def main():
         logger.info(f'\n\n>>> Buying: {tx_result:.6f} {account.base_currency} at {buy_price} taking {missing:.6f} {account.core_number_currency} from reserves\n')
         # Buy missing base currency; ie. => in ETH_BTC pair, buy missing BTC => Sell ETH
         if (not config['safe_mode_on']):
-          await account.order_market_sell(tx_result, missing)
+          await account.order_market_sell(missing)
           #account.order_market_sell(symbol=pair, quantity=missing)
 
       elif coreNumberPlummeted(account.core_number, deviated_core_number, account.max_core_number_decrease_percentage):

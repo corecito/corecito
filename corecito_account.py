@@ -83,9 +83,9 @@ class CorecitoAccount:
       self.account.order_market_buy(symbol=self.pair, quantity=quantity)
       asyncio.sleep(0.5)
 
-  async def order_market_sell(self, tx_result, quantity=0.0):
+  async def order_market_sell(self, quantity=0.0):
     if self.exchange == 'crypto.com':
-      await self.account.sell_market(self.pair, tx_result)
+      await self.account.sell_market(self.pair, quantity)
     elif self.exchange == 'binance':
       self.account.order_market_sell(symbol=self.pair, quantity=quantity)
       asyncio.sleep(0.5)
