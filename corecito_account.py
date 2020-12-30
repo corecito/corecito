@@ -13,8 +13,6 @@ class CorecitoAccount:
     self.api_key = config['api_key']
     self.api_secret = config['api_secret']
     self.core_number = config['core_number']
-    self.max_decimals_buy = config['max_decimals_buy']
-    self.max_decimals_sell = config['max_decimals_sell']
     self.min_core_number_increase_percentage = config['min_core_number_increase_percentage']
     self.max_core_number_increase_percentage = config['max_core_number_increase_percentage']
     self.min_core_number_decrease_percentage = config['min_core_number_decrease_percentage']
@@ -28,11 +26,16 @@ class CorecitoAccount:
       self.pair = eval('cro.pairs.' + config['cryptocom_trading_pair'])
       self.cro_coin_base_currency = eval('cro.coins.' + config['cryptocom_base_currency'])
       self.cro_coin_core_number_currency = eval('cro.coins.' + config['cryptocom_core_number_currency'])
+      self.max_decimals_buy = config['cryptocom_max_decimals_buy']
+      self.max_decimals_sell = config['cryptocom_max_decimals_sell']
     elif self.exchange == 'binance':
-      self.account = Client(api_key=self.api_key, api_secret=self.api_secret)
+      binance = Binance(public_key = self.api_key, secret_key = self.api_secret, sync=True)
+      self.account = binance.b
       self.pair = config['binance_trading_pair']
       self.base_currency = config['binance_base_currency']
       self.core_number_currency = config['binance_core_number_currency']
+      self.max_decimals_buy = config['binance_max_decimals_buy']
+      self.max_decimals_sell = config['binance_max_decimals_sell']
 
     if not self.account:
       raise Exception('Could not connect to the exchange account with provided keys!')
@@ -63,12 +66,16 @@ class CorecitoAccount:
       core_number_currency_balance = balances[self.cro_coin_core_number_currency]
       core_number_currency_available = core_number_currency_balance.available
     elif self.exchange == 'binance':
-      print("hola")
-      base_currency_balance = self.account.get_asset_balance(asset=self.base_currency)
-      print("adios")
-      base_currency_available = float(base_currency_balance["free"])
-      core_number_currency_balance = self.account.get_asset_balance(asset=self.core_number_currency)
-      core_number_currency_available = float(core_number_currency_balance["free"])
+      base_currency_balance = self.account.get_asset_balance(asset=self.base_currency) or 0.0
+      if base_currency_balance == 0.0:
+        base_currency_available = 0.0
+      else:
+        base_currency_available = float(base_currency_balance["free"])
+      core_number_currency_balance = self.account.get_asset_balance(asset=self.core_number_currency) or 0.0
+      if core_number_currency_balance == 0.0:
+        core_number_currency_available = 0.0
+      else:
+        core_number_currency_available = float(core_number_currency_balance["free"])
       await asyncio.sleep(0.5)
 
     return({'base_currency_balance': base_currency_balance,
@@ -89,3 +96,18 @@ class CorecitoAccount:
     elif self.exchange == 'binance':
       self.account.order_market_sell(symbol=self.pair, quantity=quantity)
       asyncio.sleep(0.5)
+
+class Binance:
+  def __init__(self, public_key = '', secret_key = '', sync = False):
+    self.time_offset = 0
+    self.b = Client(public_key, secret_key)
+
+    if sync:
+      self.time_offset = self._get_time_offset()
+
+  def _get_time_offset(self):
+    res = self.b.get_server_time()
+    return res['serverTime'] - int(time.time() * 1000)
+
+  def synced(self, fn_name, **args):
+    args['timestamp'] = int(time.time() - self.time_offset)
