@@ -85,18 +85,20 @@ class CorecitoAccount:
 
   async def order_market_buy(self, tx_result, quantity=0.0):
     if self.exchange == 'crypto.com':
+      # NOTE: We use tx_result instead of quantity here because Crypto.com has a weird behaviour: it uses ETH to denominate the transaction
       await self.account.buy_market(self.pair, tx_result)
     elif self.exchange == 'binance':
       self.account.order_market_buy(symbol=self.pair, quantity=quantity)
-      asyncio.sleep(0.5)
+      await asyncio.sleep(0.5)
 
   async def order_market_sell(self, quantity=0.0):
     if self.exchange == 'crypto.com':
       await self.account.sell_market(self.pair, quantity)
     elif self.exchange == 'binance':
       self.account.order_market_sell(symbol=self.pair, quantity=quantity)
-      asyncio.sleep(0.5)
+      await asyncio.sleep(0.5)
 
+# This wrapper solves time-offset inconsistencies between local-PC time and Binance server time
 class Binance:
   def __init__(self, public_key = '', secret_key = '', sync = False):
     self.time_offset = 0

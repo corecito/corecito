@@ -13,13 +13,8 @@ async def main():
   config = get_config()
   logger = setupLogger('logfile-' + config['corecito_exchange'] + '.log')
 
-  #account = Client(api_key=config['binance_api_key'], api_secret=config['binance_api_secret'])
   account = CorecitoAccount(config=config)
   logger.info(f'Working on {account.exchange.capitalize()} Exchange\n')
-  #core_number = config['core_number']
-  #pair = config['binance_trading_pair']
-  #base_currency = config['base_currency']
-  #core_number_currency = config['core_number_currency']
 
   iteration = 0
 
@@ -28,8 +23,6 @@ async def main():
       iteration += 1
       print(f'------------ Iteration {iteration} ------------')
       # Get BTC/ETH ticker info
-      #tickers = account.get_orderbook_tickers()
-      # Example Binance {'symbol': 'ETHBTC', 'bidPrice': '0.02706800', 'bidQty': '7.30000000', 'askPrice': '0.02707300', 'askQty': '24.00000000'} # Bid == BUY, ask == SELL
       ticker = await account.get_tickers()
       buy_price = float(ticker["buy_price"])
       sell_price = float(ticker["sell_price"])
@@ -37,11 +30,6 @@ async def main():
 
       # Get my base and Core Number currency balances
       balances = await account.get_balances()
-      #base_currency_balance = account.get_asset_balance(asset=base_currency)
-      #base_currency_available = float(base_currency_balance["free"])
-      # EXAMPLE BTC_balance:Balance(total=0.04140678, available=3.243e-05, in_orders=0.04137435, in_stake=0, coin=Coin(name='BTC'))
-      # Get my Core Number currency balance
-      #core_number_currency_balance = account.get_asset_balance(asset=core_number_currency)
 
       logger.info(f"Balances\n(Base) {account.base_currency} balance:{balances['base_currency_balance']} \n(Core) {account.core_number_currency} balance:{balances['core_number_currency_balance']}\n")
 
@@ -68,7 +56,6 @@ async def main():
         # Sell excess of base currency ie. => in ETH_BTC pair, sell excess BTC => Buy ETH
         if (not config['safe_mode_on']):
           await account.order_market_buy(tx_result, excess)
-          #account.order_market_buy(symbol=pair, quantity=excess)
 
       elif coreNumberDecreased(account.core_number, deviated_core_number, account.min_core_number_decrease_percentage, account.max_core_number_decrease_percentage):
         logger.info(f'Decreased {decrease_percentage:.2f}% - missing {missing:.6f} {account.core_number_currency} denominated in {account.base_currency}')
@@ -77,7 +64,6 @@ async def main():
         # Buy missing base currency; ie. => in ETH_BTC pair, buy missing BTC => Sell ETH
         if (not config['safe_mode_on']):
           await account.order_market_sell(missing)
-          #account.order_market_sell(symbol=pair, quantity=missing)
 
       elif coreNumberPlummeted(account.core_number, deviated_core_number, account.max_core_number_decrease_percentage):
         logger.info(f'> Plummeted {decrease_percentage:.2f}%\nConsider updating CoreNumber to {deviated_core_number:.6f}')
