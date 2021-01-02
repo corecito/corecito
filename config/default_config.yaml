@@ -19,7 +19,7 @@ cryptocom_trading_pair: ETH_BTC # This must be one of the pairs listed in https:
 cryptocom_core_number_currency: ETH # this must be one of the currencies listed in https://github.com/goincrypto/cryptocom-exchange/blob/master/src/cryptocom/exchange/coins.py
 cryptocom_base_currency: BTC # this must be one of the currencies listed in https://github.com/goincrypto/cryptocom-exchange/blob/master/src/cryptocom/exchange/coins.py
 cryptocom_max_decimals_buy: 6 # This is the limit Crypto.com has on ETH_BTC pair https://crypto.com/exchange/trade/spot/ETH_BTC
-cryptocom_max_decimals_sell: 6
+cryptocom_max_decimals_sell: 3
 binance_trading_pair: ETHBTC # This must be one of the pairs listed in Binance
 binance_core_number_currency: ETH # # This must be one of the coins listed in Binance
 binance_base_currency: BTC # # This must be one of the coins listed in Binance
