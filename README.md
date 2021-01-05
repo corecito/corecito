@@ -2,13 +2,13 @@
 
 ## Setting up
 
-*python3
+*Tested on python 3.8.2 and 3.7.8 
 *To run this project, you may need to install the following python modules:
 
 ```
 pip3 install cryptocom.exchange
 pip3 install python-binance
-pip3 install yaml
+pip3 install pyyaml
 ```
 
 ## Config
