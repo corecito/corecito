@@ -8,7 +8,7 @@ api_key: <your Crypto.com Exchange or Binance API key here>
 api_secret: <your Crypto.com Exchange or Binance API secret here>
 
 # CORE NUMBER SETTINGS
-core_number: 2 # Ethers
+core_number: 2 # EUR, ETH, etc...
 min_core_number_increase_percentage: 3
 max_core_number_increase_percentage: 10
 min_core_number_decrease_percentage: 3
@@ -26,9 +26,20 @@ binance_base_currency: BTC # # This must be one of the coins listed in Binance
 binance_max_decimals_buy: 6
 binance_max_decimals_sell: 6
 
+# FIAT SETTINGS
+is_euro: False  # TODO: Not sure if the Euro check should be here, it can be in corecito.py code just checking the <exchange>_trading_pair string
+                # example:
+                # async def main():
+                # ...
+                # iteration = 0
+                #
+                # euro = False
+                # if ('EUR' in account.pair):
+                #   euro = True
+
 # CORECITO MODES
 safe_mode_on: True # True => no real trades will be made; False => real trades will be made
 test_mode_on: True # (True => Corecito will run just once ; False => Corecito will run forever until stopped)
 
 # LOOP SETTINGS
-seconds_between_iterations: 5
+seconds_between_iterations: 10

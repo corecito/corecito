@@ -18,11 +18,13 @@ async def main():
 
   iteration = 0
 
+  euro = config['is_euro']
+
   while True:
     try:
       iteration += 1
       print(f'------------ Iteration {iteration} ------------')
-      # Get BTC/ETH ticker info
+      # Get pair ticker info. i.e. BTC/ETH, BTC/EUR, etc...
       ticker = await account.get_tickers()
       buy_price = float(ticker["buy_price"])
       sell_price = float(ticker["sell_price"])
@@ -33,14 +35,26 @@ async def main():
 
       logger.info(f"Balances\n(Base) {account.base_currency} balance:{balances['base_currency_balance']} \n(Core) {account.core_number_currency} balance:{balances['core_number_currency_balance']}\n")
 
-
       ###########################
       # Core Number Adjustments #
       ###########################
-      deviated_core_number = balances['base_currency_available'] / buy_price
+      
+      # if 'euro', balances are calculated by multiplying buy_price
+      if euro:
+        deviated_core_number = balances['base_currency_available'] * buy_price
+      else:
+        deviated_core_number = balances['base_currency_available'] / buy_price
+
       logger.info(f'Core number adjustments')
-      logger.info(f'Core number: {account.core_number} {account.core_number_currency}')
-      logger.info(f'Deviated Core number:{deviated_core_number:.6f} {account.core_number_currency}')
+      
+      #Adjust logger.info text format if 'euro'
+      if euro:
+        logger.info(f'Core number: €{account.core_number}')
+        logger.info(f'Deviated Core number: €{deviated_core_number:.2f}')
+      else:
+        logger.info(f'Core number: {account.core_number} {account.core_number_currency}')
+        logger.info(f'Deviated Core number:{deviated_core_number:.6f} {account.core_number_currency}')
+
       excess = round(deviated_core_number - account.core_number, account.max_decimals_buy)
       increase_percentage = excess * 100 / account.core_number
       missing = round(account.core_number - deviated_core_number, account.max_decimals_sell)
@@ -50,20 +64,45 @@ async def main():
         logger.info(f'> Exploded {increase_percentage:.2f}%\nConsider updating CoreNumber to {deviated_core_number:.6f}')
 
       elif coreNumberIncreased(account.core_number, deviated_core_number, account.min_core_number_increase_percentage, account.max_core_number_increase_percentage):
-        logger.info(f'Increased {increase_percentage:.2f}% - excess of {excess:.6f} {account.core_number_currency} denominated in {account.base_currency}')
-        tx_result = round(excess * buy_price, account.max_decimals_buy)
-        logger.info(f'\n\n>>> Selling: {tx_result:.6f} {account.base_currency} at {buy_price} to park an excess of {excess:.6f} {account.core_number_currency}\n')
+
+        #Check if 'euro' is True to adjust messages format and tx_result var and 'excess' has to be divided by the buy_price
+        if euro:
+          logger.info(f'Increased {increase_percentage:.2f}% - excess of €{excess:.2f} denominated in {account.base_currency}')
+          tx_result = round(excess / buy_price, account.max_decimals_buy)
+          logger.info(f'\n\n>>> Selling: {tx_result:.6f} {account.base_currency} at €{buy_price} to park an excess of €{excess:.2f}\n')
+        else:
+          logger.info(f'Increased {increase_percentage:.2f}% - excess of {excess:.6f} {account.core_number_currency} denominated in {account.base_currency}')
+          tx_result = round(excess * buy_price, account.max_decimals_buy)
+          logger.info(f'\n\n>>> Selling: {tx_result:.6f} {account.base_currency} at {buy_price} to park an excess of {excess:.6f} {account.core_number_currency}\n')
+
         # Sell excess of base currency ie. => in ETH_BTC pair, sell excess BTC => Buy ETH
+        # If euro, we sell the value previously calculated and stored on tx_result
         if (not config['safe_mode_on']):
-          await account.order_market_buy(tx_result, excess)
+          if euro:
+            await account.order_market_sell(tx_result)
+          else:
+            await account.order_market_buy(tx_result, excess)
 
       elif coreNumberDecreased(account.core_number, deviated_core_number, account.min_core_number_decrease_percentage, account.max_core_number_decrease_percentage):
-        logger.info(f'Decreased {decrease_percentage:.2f}% - missing {missing:.6f} {account.core_number_currency} denominated in {account.base_currency}')
-        tx_result = missing * sell_price
-        logger.info(f'\n\n>>> Buying: {tx_result:.6f} {account.base_currency} at {buy_price} taking {missing:.6f} {account.core_number_currency} from reserves\n')
+        
+        #Check is euro is True to adjust messages format and tx_result var and 'missing' has to be divided by the sell_price
+        if euro:
+          logger.info(f'Decreased {decrease_percentage:.2f}% - missing {missing:.6f} {account.core_number_currency} denominated in {account.base_currency}')
+          tx_result = round(missing / sell_price, account.max_decimals_sell)
+          logger.info(f"\n\n>>> Buying: {tx_result:.6f} {account.base_currency} at €{buy_price} taking €{missing:.2f} {account.core_number_currency} from reserves\n")
+        
+        else:
+          logger.info(f'Decreased {decrease_percentage:.2f}% - missing {missing:.6f} {account.core_number_currency} denominated in {account.base_currency}')
+          tx_result = missing * sell_price
+          logger.info(f'\n\n>>> Buying: {tx_result:.6f} {account.base_currency} at {buy_price} taking {missing:.6f} {account.core_number_currency} from reserves\n')
+        
         # Buy missing base currency; ie. => in ETH_BTC pair, buy missing BTC => Sell ETH
         if (not config['safe_mode_on']):
-          await account.order_market_sell(missing)
+          if euro:
+            await account.order_market_buy(missing, tx_result)
+          else:
+            await account.order_market_sell(missing)
+
 
       elif coreNumberPlummeted(account.core_number, deviated_core_number, account.max_core_number_decrease_percentage):
         logger.info(f'> Plummeted {decrease_percentage:.2f}%\nConsider updating CoreNumber to {deviated_core_number:.6f}')
