@@ -5,6 +5,7 @@ import logging
 import yaml
 import sys
 import traceback
+import requests
 from os.path import exists
 import cryptocom.exchange as cro
 from corecito_account import CorecitoAccount
@@ -47,26 +48,38 @@ async def main():
       decrease_percentage = missing * 100 / account.core_number
 
       if coreNumberExploded(account.core_number, deviated_core_number, account.max_core_number_increase_percentage):
-        logger.info(f'> Exploded {increase_percentage:.2f}%\nConsider updating CoreNumber to {deviated_core_number:.6f}')
+        log_message = f'> Exploded {increase_percentage:.2f}%\nConsider updating CoreNumber to {deviated_core_number:.6f}'
+        logger.info(log_message)
+        if config['telegram_notifications_on']:
+          telegram_bot_sendtext(config['telegram_bot_token'], config['telegram_user_id'], log_message)
 
       elif coreNumberIncreased(account.core_number, deviated_core_number, account.min_core_number_increase_percentage, account.max_core_number_increase_percentage):
         logger.info(f'Increased {increase_percentage:.2f}% - excess of {excess:.6f} {account.core_number_currency} denominated in {account.base_currency}')
         tx_result = round(excess * buy_price, account.max_decimals_buy)
-        logger.info(f'\n\n>>> Selling: {tx_result:.6f} {account.base_currency} at {buy_price} to park an excess of {excess:.6f} {account.core_number_currency}\n')
+        log_message = f'\n\n>>> Selling: {tx_result:.6f} {account.base_currency} at {buy_price} to park an excess of {excess:.6f} {account.core_number_currency}\n'
+        logger.info(log_message)
         # Sell excess of base currency ie. => in ETH_BTC pair, sell excess BTC => Buy ETH
         if (not config['safe_mode_on']):
           await account.order_market_buy(tx_result, excess)
+          if config['telegram_notifications_on']:
+              telegram_bot_sendtext(config['telegram_bot_token'], config['telegram_user_id'], log_message)
 
       elif coreNumberDecreased(account.core_number, deviated_core_number, account.min_core_number_decrease_percentage, account.max_core_number_decrease_percentage):
         logger.info(f'Decreased {decrease_percentage:.2f}% - missing {missing:.6f} {account.core_number_currency} denominated in {account.base_currency}')
         tx_result = missing * sell_price
-        logger.info(f'\n\n>>> Buying: {tx_result:.6f} {account.base_currency} at {buy_price} taking {missing:.6f} {account.core_number_currency} from reserves\n')
+        log_message = f'\n\n>>> Buying: {tx_result:.6f} {account.base_currency} at {buy_price} taking {missing:.6f} {account.core_number_currency} from reserves\n'
+        logger.info(log_message)
         # Buy missing base currency; ie. => in ETH_BTC pair, buy missing BTC => Sell ETH
         if (not config['safe_mode_on']):
           await account.order_market_sell(missing)
+          if config['telegram_notifications_on']:
+            telegram_bot_sendtext(config['telegram_bot_token'], config['telegram_user_id'], log_message)
 
       elif coreNumberPlummeted(account.core_number, deviated_core_number, account.max_core_number_decrease_percentage):
-        logger.info(f'> Plummeted {decrease_percentage:.2f}%\nConsider updating CoreNumber to {deviated_core_number:.6f}')
+        log_message = f'> Plummeted {decrease_percentage:.2f}%\nConsider updating CoreNumber to {deviated_core_number:.6f}'
+        logger.info(log_message)
+        if config['telegram_notifications_on']:
+          telegram_bot_sendtext(config['telegram_bot_token'], config['telegram_user_id'], log_message)
 
       else:
         logger.info(f'> Price is rock-solid stable ({increase_percentage:.2f}%)')
@@ -162,6 +175,12 @@ def setupLogger(log_filename):
 
   logger.setLevel('DEBUG')
   return logger
+
+def telegram_bot_sendtext(bot_token, bot_chatID, bot_message):
+  send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + str(bot_chatID) + '&parse_mode=Markdown&text=' + bot_message
+  response = requests.get(send_text)
+
+  return response.json()
 
 
 
