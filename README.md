@@ -11,15 +11,7 @@ pip3 install python-binance
 pip3 install pyyaml
 ```
 
-For Telegram notifications, you'll also need
-
-```
-pip3 install telebot
-pip3 install telethon
-```
-
-... and follow the steps in the "Getting Started" section [here](https://www.geeksforgeeks.org/send-message-to-telegram-user-using-python/)
-Then you will need to set Telegram bot's info (bot ap_id, bot ap_hash, telephone number, etc) in the config file.
+For Telegram notifications, you'll also need to enable it in the config (set 'telegram_notifications_on' to True) and provide 'telegram_bot_token' and 'telegram_user_id' ([how to create your Telegram bot](https://medium.com/@ManHay_Hong/how-to-create-a-telegram-bot-and-send-messages-with-python-4cf314d9fa3e)
 
 ## Config
 
