@@ -18,7 +18,7 @@ async def main():
 
   iteration = 0
 
-  euro = config['is_euro']
+  fiat = config['is_fiat']
 
   while True:
     try:
@@ -39,16 +39,16 @@ async def main():
       # Core Number Adjustments #
       ###########################
       
-      # if 'euro', balances are calculated by multiplying buy_price
-      if euro:
+      # if 'fiat', balances are calculated by multiplying buy_price
+      if fiat:
         deviated_core_number = balances['base_currency_available'] * buy_price
       else:
         deviated_core_number = balances['base_currency_available'] / buy_price
 
       logger.info(f'Core number adjustments')
       
-      #Adjust logger.info text format if 'euro'
-      if euro:
+      #Adjust logger.info text format if 'fiat'
+      if fiat:
         logger.info(f'Core number: €{account.core_number}')
         logger.info(f'Deviated Core number: €{deviated_core_number:.2f}')
       else:
@@ -65,8 +65,8 @@ async def main():
 
       elif coreNumberIncreased(account.core_number, deviated_core_number, account.min_core_number_increase_percentage, account.max_core_number_increase_percentage):
 
-        #Check if 'euro' is True to adjust messages format and tx_result var and 'excess' has to be divided by the buy_price
-        if euro:
+        #Check if 'fiat' is True to adjust messages format and tx_result var and 'excess' has to be divided by the buy_price
+        if fiat:
           logger.info(f'Increased {increase_percentage:.2f}% - excess of €{excess:.2f} denominated in {account.base_currency}')
           tx_result = round(excess / buy_price, account.max_decimals_buy)
           logger.info(f'\n\n>>> Selling: {tx_result:.6f} {account.base_currency} at €{buy_price} to park an excess of €{excess:.2f}\n')
@@ -76,17 +76,17 @@ async def main():
           logger.info(f'\n\n>>> Selling: {tx_result:.6f} {account.base_currency} at {buy_price} to park an excess of {excess:.6f} {account.core_number_currency}\n')
 
         # Sell excess of base currency ie. => in ETH_BTC pair, sell excess BTC => Buy ETH
-        # If euro, we sell the value previously calculated and stored on tx_result
+        # If fiat, we sell the value previously calculated and stored on tx_result
         if (not config['safe_mode_on']):
-          if euro:
+          if fiat:
             await account.order_market_sell(tx_result)
           else:
             await account.order_market_buy(tx_result, excess)
 
       elif coreNumberDecreased(account.core_number, deviated_core_number, account.min_core_number_decrease_percentage, account.max_core_number_decrease_percentage):
         
-        #Check is euro is True to adjust messages format and tx_result var and 'missing' has to be divided by the sell_price
-        if euro:
+        #Check is fiat is True to adjust messages format and tx_result var and 'missing' has to be divided by the sell_price
+        if fiat:
           logger.info(f'Decreased {decrease_percentage:.2f}% - missing {missing:.6f} {account.core_number_currency} denominated in {account.base_currency}')
           tx_result = round(missing / sell_price, account.max_decimals_sell)
           logger.info(f"\n\n>>> Buying: {tx_result:.6f} {account.base_currency} at €{buy_price} taking €{missing:.2f} {account.core_number_currency} from reserves\n")
@@ -98,7 +98,7 @@ async def main():
         
         # Buy missing base currency; ie. => in ETH_BTC pair, buy missing BTC => Sell ETH
         if (not config['safe_mode_on']):
-          if euro:
+          if fiat:
             await account.order_market_buy(missing, tx_result)
           else:
             await account.order_market_sell(missing)
