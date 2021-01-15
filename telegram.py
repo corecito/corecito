@@ -3,7 +3,7 @@ import asyncio
 import requests
 
 class Telegram:
-  """Configures Telegram object with provided info from the provided config"""
+  """Configures Telegram object with info from the provided config"""
   def __init__(self, config=None):
     self.url = 'https://api.telegram.org/bot'
     self.action = '/sendMessage?chat_id='
