@@ -46,14 +46,8 @@ async def main():
         deviated_core_number = balances['base_currency_available'] / buy_price
 
       logger.info(f'Core number adjustments')
-      
-      #Adjust logger.info text format if 'fiat'
-      if fiat:
-        logger.info(f'Core number: €{account.core_number}')
-        logger.info(f'Deviated Core number: €{deviated_core_number:.2f}')
-      else:
-        logger.info(f'Core number: {account.core_number} {account.core_number_currency}')
-        logger.info(f'Deviated Core number:{deviated_core_number:.6f} {account.core_number_currency}')
+      logger.info(f'Core number: {account.core_number} {account.core_number_currency}')
+      logger.info(f'Deviated Core number:{deviated_core_number:.6f} {account.core_number_currency}')
 
       excess = round(deviated_core_number - account.core_number, account.max_decimals_buy)
       increase_percentage = excess * 100 / account.core_number
@@ -67,14 +61,13 @@ async def main():
 
         #Check if 'fiat' is True to adjust messages format and tx_result var and 'excess' has to be divided by the buy_price
         if fiat:
-          logger.info(f'Increased {increase_percentage:.2f}% - excess of €{excess:.2f} denominated in {account.base_currency}')
           tx_result = round(excess / buy_price, account.max_decimals_buy)
-          logger.info(f'\n\n>>> Selling: {tx_result:.6f} {account.base_currency} at €{buy_price} to park an excess of €{excess:.2f}\n')
         else:
-          logger.info(f'Increased {increase_percentage:.2f}% - excess of {excess:.6f} {account.core_number_currency} denominated in {account.base_currency}')
           tx_result = round(excess * buy_price, account.max_decimals_buy)
-          logger.info(f'\n\n>>> Selling: {tx_result:.6f} {account.base_currency} at {buy_price} to park an excess of {excess:.6f} {account.core_number_currency}\n')
 
+        logger.info(f'\n\n>>> Selling: {tx_result:.6f} {account.base_currency} at {buy_price} to park an excess of {excess:.6f} {account.core_number_currency}\n')
+        logger.info(f'Increased {increase_percentage:.2f}% - excess of {excess:.6f} {account.core_number_currency} denominated in {account.base_currency}')
+        
         # Sell excess of base currency ie. => in ETH_BTC pair, sell excess BTC => Buy ETH
         # If fiat, we sell the value previously calculated and stored on tx_result
         if (not config['safe_mode_on']):
@@ -87,14 +80,12 @@ async def main():
         
         #Check is fiat is True to adjust messages format and tx_result var and 'missing' has to be divided by the sell_price
         if fiat:
-          logger.info(f'Decreased {decrease_percentage:.2f}% - missing {missing:.6f} {account.core_number_currency} denominated in {account.base_currency}')
           tx_result = round(missing / sell_price, account.max_decimals_sell)
-          logger.info(f"\n\n>>> Buying: {tx_result:.6f} {account.base_currency} at €{buy_price} taking €{missing:.2f} {account.core_number_currency} from reserves\n")
-        
         else:
-          logger.info(f'Decreased {decrease_percentage:.2f}% - missing {missing:.6f} {account.core_number_currency} denominated in {account.base_currency}')
           tx_result = missing * sell_price
-          logger.info(f'\n\n>>> Buying: {tx_result:.6f} {account.base_currency} at {buy_price} taking {missing:.6f} {account.core_number_currency} from reserves\n')
+          
+        logger.info(f'Decreased {decrease_percentage:.2f}% - missing {missing:.6f} {account.core_number_currency} denominated in {account.base_currency}')
+        logger.info(f'\n\n>>> Buying: {tx_result:.6f} {account.base_currency} at {buy_price} taking {missing:.6f} {account.core_number_currency} from reserves\n')
         
         # Buy missing base currency; ie. => in ETH_BTC pair, buy missing BTC => Sell ETH
         if (not config['safe_mode_on']):
