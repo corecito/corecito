@@ -1,20 +1,23 @@
 #!/usr/bin/env python3
 import asyncio
-import time
-import logging
 import yaml
 import sys
 import traceback
 from os.path import exists
 import cryptocom.exchange as cro
 from corecito_account import CorecitoAccount
+from telegram import Telegram
+from logger import Logger
 
 async def main():
   config = get_config()
-  logger = setupLogger('logfile-' + config['corecito_exchange'] + '.log')
+
+  logger = Logger(config['corecito_exchange'])
 
   account = CorecitoAccount(config=config)
-  logger.info(f'Working on {account.exchange.capitalize()} Exchange\n')
+  logger.logger.info(f'Working on {account.exchange.capitalize()} Exchange\n')
+
+  telegram = Telegram(config=config)
 
   iteration = 0
 
@@ -47,29 +50,29 @@ async def main():
       decrease_percentage = missing * 100 / account.core_number
 
       if coreNumberExploded(account.core_number, deviated_core_number, account.max_core_number_increase_percentage):
-        logger.info(f'> Exploded {increase_percentage:.2f}%\nConsider updating CoreNumber to {deviated_core_number:.6f}')
+        logger.logCoreNumberExploded(increase_percentage, deviated_core_number, telegram)
 
       elif coreNumberIncreased(account.core_number, deviated_core_number, account.min_core_number_increase_percentage, account.max_core_number_increase_percentage):
-        logger.info(f'Increased {increase_percentage:.2f}% - excess of {excess:.6f} {account.core_number_currency} denominated in {account.base_currency}')
+        logger.logCoreNumberIncreased(increase_percentage, excess, account.core_number_currency, account.base_currency, telegram)
         tx_result = round(excess * buy_price, account.max_decimals_buy)
-        logger.info(f'\n\n>>> Selling: {tx_result:.6f} {account.base_currency} at {buy_price} to park an excess of {excess:.6f} {account.core_number_currency}\n')
+        logger.logSellExcess(tx_result, account.base_currency, buy_price, excess, account.core_number_currency, telegram)
         # Sell excess of base currency ie. => in ETH_BTC pair, sell excess BTC => Buy ETH
         if (not config['safe_mode_on']):
           await account.order_market_buy(tx_result, excess)
 
       elif coreNumberDecreased(account.core_number, deviated_core_number, account.min_core_number_decrease_percentage, account.max_core_number_decrease_percentage):
-        logger.info(f'Decreased {decrease_percentage:.2f}% - missing {missing:.6f} {account.core_number_currency} denominated in {account.base_currency}')
+        logger.logCoreNumberDecreased(decrease_percentage, missing, account.core_number_currency, account.base_currency, telegram)
         tx_result = missing * sell_price
-        logger.info(f'\n\n>>> Buying: {tx_result:.6f} {account.base_currency} at {buy_price} taking {missing:.6f} {account.core_number_currency} from reserves\n')
+        logger.logBuyMissing(tx_result, account.base_currency, buy_price, missing, account.core_number_currency, telegram):
         # Buy missing base currency; ie. => in ETH_BTC pair, buy missing BTC => Sell ETH
         if (not config['safe_mode_on']):
           await account.order_market_sell(missing)
 
       elif coreNumberPlummeted(account.core_number, deviated_core_number, account.max_core_number_decrease_percentage):
-        logger.info(f'> Plummeted {decrease_percentage:.2f}%\nConsider updating CoreNumber to {deviated_core_number:.6f}')
+        logger.logCoreNumberPlummeted(decrease_percentage, deviated_core_number, telegram)
 
       else:
-        logger.info(f'> Price is rock-solid stable ({increase_percentage:.2f}%)')
+        logger.logPriceStable(increase_percentage)
 
       # Update balances after adjusting to core number
       balances = await account.get_balances()
@@ -84,7 +87,7 @@ async def main():
         # Wait given seconds until next poll
         logger.info("Waiting for next iteration... ({} seconds)\n\n\n".format(config['seconds_between_iterations']))
         await asyncio.sleep(config['seconds_between_iterations'])
-
+  
     except Exception as e:
       # Network issue(s) occurred (most probably). Jumping to next iteration
       if config['test_mode_on']:
@@ -145,23 +148,6 @@ def coreNumberDecreased(core_number, deviated_core_number, min_core_number_decre
 def coreNumberPlummeted(core_number, deviated_core_number, max_core_number_decrease_percentage):
   max_core_number_decrease = core_number * (1 - (max_core_number_decrease_percentage/100))
   return deviated_core_number < max_core_number_decrease
-
-def setupLogger(log_filename):
-  logger = logging.getLogger('CN')
-
-  file_log_handler = logging.FileHandler(log_filename)
-  logger.addHandler(file_log_handler)
-
-  stderr_log_handler = logging.StreamHandler()
-  logger.addHandler(stderr_log_handler)
-
-  # nice output format
-  formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-  file_log_handler.setFormatter(formatter)
-  stderr_log_handler.setFormatter(formatter)
-
-  logger.setLevel('DEBUG')
-  return logger
 
 
 
