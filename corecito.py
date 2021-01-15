@@ -63,7 +63,7 @@ async def main():
       elif coreNumberDecreased(account.core_number, deviated_core_number, account.min_core_number_decrease_percentage, account.max_core_number_decrease_percentage):
         logger.logCoreNumberDecreased(decrease_percentage, missing, account.core_number_currency, account.base_currency, telegram)
         tx_result = missing * sell_price
-        logger.logBuyMissing(tx_result, account.base_currency, buy_price, missing, account.core_number_currency, telegram):
+        logger.logBuyMissing(tx_result, account.base_currency, buy_price, missing, account.core_number_currency, telegram)
         # Buy missing base currency; ie. => in ETH_BTC pair, buy missing BTC => Sell ETH
         if (not config['safe_mode_on']):
           await account.order_market_sell(missing)

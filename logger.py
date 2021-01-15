@@ -8,6 +8,9 @@ class Logger:
       exchange_str = '-' + exchange
     self.logger = setupLogger('logfile' + exchange_str + '.log')
 
+  def info(self, msg, *args, **kwargs):
+    self.logger.info(msg, *args, **kwargs)
+
   def logCoreNumberExploded(self, increase_percentage, deviated_core_number, telegram):
     log_message = f'> Exploded {increase_percentage:.2f}%\nConsider updating CoreNumber to {deviated_core_number:.6f}'
     self.logger.info(log_message)
