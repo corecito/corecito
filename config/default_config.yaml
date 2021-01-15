@@ -27,15 +27,8 @@ binance_max_decimals_buy: 6
 binance_max_decimals_sell: 6
 
 # FIAT SETTINGS
-is_fiat: False  # TODO: Not sure if the Euro check should be here, it can be in corecito.py code just checking the <exchange>_trading_pair string
-                # example:
-                # async def main():
-                # ...
-                # iteration = 0
-                #
-                # euro = False
-                # if ('EUR' in account.pair):
-                #   euro = True
+is_fiat: False  # True  => If a trading pair involving Fiat or Stable Coins is used.  i.e. BTC/EUR, ETH/USDT, etc...
+                # False => If a trading pair involving two crypto currencies is used. i.e. BTC/ETH, ADA/ETH, etc...
 
 # CORECITO MODES
 safe_mode_on: True # True => no real trades will be made; False => real trades will be made
