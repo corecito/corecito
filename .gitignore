@@ -3,3 +3,4 @@ logfile*.log
 config/user_config.yaml
 *.pyproj
 *.sln
+session*

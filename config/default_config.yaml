@@ -35,4 +35,9 @@ safe_mode_on: True # True => no real trades will be made; False => real trades w
 test_mode_on: True # (True => Corecito will run just once ; False => Corecito will run forever until stopped)
 
 # LOOP SETTINGS
-seconds_between_iterations: 10
+seconds_between_iterations: 5
+
+# TELEGRAM CONFIGURATION
+telegram_notifications_on: False # must be True or False
+telegram_bot_token: <bot token>
+telegram_user_id: <your user id> # In telegram app, search for '@userinfobot' and tap 'Start', it will reply with your user_id

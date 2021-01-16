@@ -2,7 +2,7 @@
 
 ## Setting up
 
-*Tested on python 3.8.2 and 3.7.8 
+*Tested on python 3.8.2 and 3.7.8
 *To run this project, you may need to install the following python modules:
 
 ```
@@ -10,6 +10,8 @@ pip3 install cryptocom.exchange
 pip3 install python-binance
 pip3 install pyyaml
 ```
+
+For Telegram notifications, you'll also need to enable it in the config (set 'telegram_notifications_on' to True) and provide 'telegram_bot_token' and 'telegram_user_id' ([how to create your Telegram bot](https://medium.com/@ManHay_Hong/how-to-create-a-telegram-bot-and-send-messages-with-python-4cf314d9fa3e))
 
 ## Config
 
