@@ -23,6 +23,8 @@ async def main():
 
   fiat = config['is_fiat']
 
+  tx_price = 0
+
   while True:
     try:
       iteration += 1
@@ -65,9 +67,11 @@ async def main():
         #Check if 'fiat' is True to adjust messages format and tx_result var and 'excess' has to be divided by the buy_price
         if fiat:
           tx_result = round(excess / buy_price, account.max_decimals_buy)
+          tx_price = buy_price
         else:
           tx_result = round(excess * sell_price, account.max_decimals_buy)
-        logger.logSellExcess(tx_result, account.base_currency, buy_price, excess, account.core_number_currency, telegram)
+          tx_price = sell_price
+        logger.logSellExcess(tx_result, account.base_currency, tx_price, excess, account.core_number_currency, telegram)
 
   
         # Sell excess of base currency ie. => in ETH_BTC pair, sell excess BTC => Buy ETH
@@ -83,9 +87,11 @@ async def main():
         #Check is fiat is True to adjust messages format and tx_result var and 'missing' has to be divided by the sell_price
         if fiat:
           tx_result = round(missing / sell_price, account.max_decimals_sell)
+          tx_price = sell_price
         else:
           tx_result = missing * buy_price
-        logger.logBuyMissing(tx_result, account.base_currency, buy_price, missing, account.core_number_currency, telegram)
+          tx_price = buy_price
+        logger.logBuyMissing(tx_result, account.base_currency, tx_price, missing, account.core_number_currency, telegram)
 
         # Buy missing base currency; ie. => in ETH_BTC pair, buy missing BTC => Sell ETH
         if (not config['safe_mode_on']):
