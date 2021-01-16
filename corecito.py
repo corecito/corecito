@@ -66,7 +66,7 @@ async def main():
         if fiat:
           tx_result = round(excess / buy_price, account.max_decimals_buy)
         else:
-          tx_result = round(excess * buy_price, account.max_decimals_buy)
+          tx_result = round(excess * sell_price, account.max_decimals_buy)
         logger.logSellExcess(tx_result, account.base_currency, buy_price, excess, account.core_number_currency, telegram)
 
   
@@ -84,7 +84,7 @@ async def main():
         if fiat:
           tx_result = round(missing / sell_price, account.max_decimals_sell)
         else:
-          tx_result = missing * sell_price
+          tx_result = missing * buy_price
         logger.logBuyMissing(tx_result, account.base_currency, buy_price, missing, account.core_number_currency, telegram)
 
         # Buy missing base currency; ie. => in ETH_BTC pair, buy missing BTC => Sell ETH
