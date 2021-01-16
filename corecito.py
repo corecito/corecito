@@ -79,13 +79,14 @@ async def main():
             await account.order_market_buy(tx_result, excess)
 
       elif coreNumberDecreased(account.core_number, deviated_core_number, account.min_core_number_decrease_percentage, account.max_core_number_decrease_percentage):
-        logger.info(f'Decreased {decrease_percentage:.2f}% - missing {missing:.6f} {account.core_number_currency} denominated in {account.base_currency}')
+        logger.logCoreNumberDecreased(decrease_percentage, missing, account.core_number_currency, account.base_currency, telegram)
         #Check is fiat is True to adjust messages format and tx_result var and 'missing' has to be divided by the sell_price
         if fiat:
           tx_result = round(missing / sell_price, account.max_decimals_sell)
         else:
           tx_result = missing * sell_price
-        logger.info(f'\n\n>>> Buying: {tx_result:.6f} {account.base_currency} at {buy_price} taking {missing:.6f} {account.core_number_currency} from reserves\n')
+        logger.logBuyMissing(tx_result, account.base_currency, buy_price, missing, account.core_number_currency, telegram)
+
         # Buy missing base currency; ie. => in ETH_BTC pair, buy missing BTC => Sell ETH
         if (not config['safe_mode_on']):
           if fiat:
