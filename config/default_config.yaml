@@ -8,7 +8,7 @@ api_key: <your Crypto.com Exchange or Binance API key here>
 api_secret: <your Crypto.com Exchange or Binance API secret here>
 
 # CORE NUMBER SETTINGS
-core_number: 2 # Ethers
+core_number: 2 # EUR, ETH, etc...
 min_core_number_increase_percentage: 3
 max_core_number_increase_percentage: 10
 min_core_number_decrease_percentage: 3
@@ -25,6 +25,10 @@ binance_core_number_currency: ETH # # This must be one of the coins listed in Bi
 binance_base_currency: BTC # # This must be one of the coins listed in Binance
 binance_max_decimals_buy: 6
 binance_max_decimals_sell: 6
+
+# FIAT SETTINGS
+is_fiat: False  # True  => If a trading pair involving Fiat or Stable Coins is used.  i.e. BTC/EUR, ETH/USDT, etc...
+                # False => If a trading pair involving two crypto currencies is used. i.e. BTC/ETH, ADA/ETH, etc...
 
 # CORECITO MODES
 safe_mode_on: True # True => no real trades will be made; False => real trades will be made

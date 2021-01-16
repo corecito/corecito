@@ -21,11 +21,15 @@ async def main():
 
   iteration = 0
 
+  fiat = config['is_fiat']
+
+  tx_price = 0
+
   while True:
     try:
       iteration += 1
       print(f'------------ Iteration {iteration} ------------')
-      # Get BTC/ETH ticker info
+      # Get pair ticker info. i.e. BTC/ETH, BTC/EUR, etc...
       ticker = await account.get_tickers()
       buy_price = float(ticker["buy_price"])
       sell_price = float(ticker["sell_price"])
@@ -36,14 +40,20 @@ async def main():
 
       logger.info(f"Balances\n(Base) {account.base_currency} balance:{balances['base_currency_balance']} \n(Core) {account.core_number_currency} balance:{balances['core_number_currency_balance']}\n")
 
-
       ###########################
       # Core Number Adjustments #
       ###########################
-      deviated_core_number = balances['base_currency_available'] / buy_price
+      
+      # if 'fiat', balances are calculated by multiplying buy_price
+      if fiat:
+        deviated_core_number = balances['base_currency_available'] * buy_price
+      else:
+        deviated_core_number = balances['base_currency_available'] / buy_price
+
       logger.info(f'Core number adjustments')
       logger.info(f'Core number: {account.core_number} {account.core_number_currency}')
       logger.info(f'Deviated Core number:{deviated_core_number:.6f} {account.core_number_currency}')
+
       excess = round(deviated_core_number - account.core_number, account.max_decimals_buy)
       increase_percentage = excess * 100 / account.core_number
       missing = round(account.core_number - deviated_core_number, account.max_decimals_sell)
@@ -54,19 +64,42 @@ async def main():
 
       elif coreNumberIncreased(account.core_number, deviated_core_number, account.min_core_number_increase_percentage, account.max_core_number_increase_percentage):
         logger.logCoreNumberIncreased(increase_percentage, excess, account.core_number_currency, account.base_currency, telegram)
-        tx_result = round(excess * buy_price, account.max_decimals_buy)
-        logger.logSellExcess(tx_result, account.base_currency, buy_price, excess, account.core_number_currency, telegram)
+        #Check if 'fiat' is True to adjust messages format and tx_result var and 'excess' has to be divided by the buy_price
+        if fiat:
+          tx_result = round(excess / buy_price, account.max_decimals_buy)
+          tx_price = buy_price
+        else:
+          tx_result = round(excess * sell_price, account.max_decimals_buy)
+          tx_price = sell_price
+        logger.logSellExcess(tx_result, account.base_currency, tx_price, excess, account.core_number_currency, telegram)
+
+  
         # Sell excess of base currency ie. => in ETH_BTC pair, sell excess BTC => Buy ETH
+        # If fiat, we sell the value previously calculated and stored on tx_result
         if (not config['safe_mode_on']):
-          await account.order_market_buy(tx_result, excess)
+          if fiat:
+            await account.order_market_sell(tx_result)
+          else:
+            await account.order_market_buy(tx_result, excess)
 
       elif coreNumberDecreased(account.core_number, deviated_core_number, account.min_core_number_decrease_percentage, account.max_core_number_decrease_percentage):
         logger.logCoreNumberDecreased(decrease_percentage, missing, account.core_number_currency, account.base_currency, telegram)
-        tx_result = missing * sell_price
-        logger.logBuyMissing(tx_result, account.base_currency, buy_price, missing, account.core_number_currency, telegram)
+        #Check is fiat is True to adjust messages format and tx_result var and 'missing' has to be divided by the sell_price
+        if fiat:
+          tx_result = round(missing / sell_price, account.max_decimals_sell)
+          tx_price = sell_price
+        else:
+          tx_result = missing * buy_price
+          tx_price = buy_price
+        logger.logBuyMissing(tx_result, account.base_currency, tx_price, missing, account.core_number_currency, telegram)
+
         # Buy missing base currency; ie. => in ETH_BTC pair, buy missing BTC => Sell ETH
         if (not config['safe_mode_on']):
-          await account.order_market_sell(missing)
+          if fiat:
+            await account.order_market_buy(missing, tx_result)
+          else:
+            await account.order_market_sell(missing)
+
 
       elif coreNumberPlummeted(account.core_number, deviated_core_number, account.max_core_number_decrease_percentage):
         logger.logCoreNumberPlummeted(decrease_percentage, deviated_core_number, telegram)

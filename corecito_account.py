@@ -17,6 +17,7 @@ class CorecitoAccount:
     self.max_core_number_increase_percentage = config['max_core_number_increase_percentage']
     self.min_core_number_decrease_percentage = config['min_core_number_decrease_percentage']
     self.max_core_number_decrease_percentage = config['max_core_number_decrease_percentage']
+    self.is_fiat = config['is_fiat']
 
     if self.exchange == 'crypto.com':
       self.account = cro.Account(api_key=self.api_key, api_secret=self.api_secret)
