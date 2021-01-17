@@ -11,6 +11,7 @@ class Telegram:
     self.bot_token = config['telegram_bot_token']
     self.bot_chatId = config['telegram_user_id']
     self.notifications_on = config['telegram_notifications_on']
+    self.notify_errors_on = config['telegram_notify_errors']
 
 
   def send(self, bot_message):

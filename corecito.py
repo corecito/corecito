@@ -136,7 +136,7 @@ async def main():
         await asyncio.sleep(1)
         break
       else:
-        logger.info("Exception occurred -> '{}'. Waiting for next iteration... ({} seconds)\n\n\n".format(e, config['seconds_between_iterations']))
+        logger.logException(e, config, telegram)
         print(traceback.format_exc())
         await asyncio.sleep(config['seconds_between_iterations'])
 
