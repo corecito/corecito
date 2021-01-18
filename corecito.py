@@ -43,7 +43,7 @@ async def main():
       ###########################
       # Core Number Adjustments #
       ###########################
-      
+
       # if 'fiat', balances are calculated by multiplying buy_price
       if fiat:
         deviated_core_number = balances['base_currency_available'] * buy_price
@@ -127,7 +127,7 @@ async def main():
         # Wait given seconds until next poll
         logger.info("Waiting for next iteration... ({} seconds)\n\n\n".format(config['seconds_between_iterations']))
         await asyncio.sleep(config['seconds_between_iterations'])
-  
+
     except Exception as e:
       # Network issue(s) occurred (most probably). Jumping to next iteration
       if config['test_mode_on']:
