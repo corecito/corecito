@@ -59,8 +59,15 @@ async def main():
       missing = round(account.core_number - deviated_core_number, account.max_decimals_sell)
       decrease_percentage = missing * 100 / account.core_number
 
-      if coreNumberExploded(account.core_number, deviated_core_number, account.max_core_number_increase_percentage):
+      if pricePlummeted(buy_price, account.min_price_stop):
+        logger.logPricePlummeted(buy_price, account.min_price_stop, account.pair_name, telegram)
+
+      elif priceExploded(buy_price, account.max_price_stop):
+        logger.logPriceExploded(buy_price, account.max_price_stop, account.pair_name, telegram)
+
+      elif coreNumberExploded(account.core_number, deviated_core_number, account.max_core_number_increase_percentage):
         logger.logCoreNumberExploded(increase_percentage, deviated_core_number, telegram)
+
 
       elif coreNumberIncreased(account.core_number, deviated_core_number, account.min_core_number_increase_percentage, account.max_core_number_increase_percentage):
         logger.logCoreNumberIncreased(increase_percentage, excess, account.core_number_currency, account.base_currency, telegram)
@@ -73,7 +80,6 @@ async def main():
           tx_price = sell_price
         logger.logSellExcess(tx_result, account.base_currency, tx_price, excess, account.core_number_currency, telegram)
 
-  
         # Sell excess of base currency ie. => in ETH_BTC pair, sell excess BTC => Buy ETH
         # If fiat, we sell the value previously calculated and stored on tx_result
         if (not config['safe_mode_on']):
@@ -81,6 +87,7 @@ async def main():
             await account.order_market_sell(tx_result)
           else:
             await account.order_market_buy(tx_result, excess)
+
 
       elif coreNumberDecreased(account.core_number, deviated_core_number, account.min_core_number_decrease_percentage, account.max_core_number_decrease_percentage):
         logger.logCoreNumberDecreased(decrease_percentage, missing, account.core_number_currency, account.base_currency, telegram)
@@ -163,6 +170,16 @@ def check_config(data):
   except AttributeError:
     print('Currency "{}" does not exist (check your config_file)'.format(data['cryptocom_base_currency']))
     sys.exit(1)
+
+def pricePlummeted(price, min_price_stop):
+  if min_price_stop is None:
+    return False
+  return price < min_price_stop
+
+def priceExploded(price, max_price_stop):
+  if max_price_stop is None:
+    return False
+  return price > max_price_stop
 
 def coreNumberIncreased(core_number, deviated_core_number, min_core_number_increase_percentage, max_core_number_increase_percentage):
   min_core_number_increase = core_number * (1 + (min_core_number_increase_percentage/100))

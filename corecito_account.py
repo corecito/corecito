@@ -13,6 +13,8 @@ class CorecitoAccount:
     self.api_key = config['api_key']
     self.api_secret = config['api_secret']
     self.core_number = config['core_number']
+    self.min_price_stop = config['min_price_stop'] if 'min_price_stop' in config else None
+    self.max_price_stop = config['max_price_stop'] if 'max_price_stop' in config else None
     self.min_core_number_increase_percentage = config['min_core_number_increase_percentage']
     self.max_core_number_increase_percentage = config['max_core_number_increase_percentage']
     self.min_core_number_decrease_percentage = config['min_core_number_decrease_percentage']
@@ -25,6 +27,7 @@ class CorecitoAccount:
       self.base_currency = config['cryptocom_base_currency']
       self.core_number_currency = config['cryptocom_core_number_currency']
       self.pair = eval('cro.pairs.' + config['cryptocom_trading_pair'])
+      self.pair_name = self.pair.name.replace('_', '/')
       self.cro_coin_base_currency = eval('cro.coins.' + config['cryptocom_base_currency'])
       self.cro_coin_core_number_currency = eval('cro.coins.' + config['cryptocom_core_number_currency'])
       self.max_decimals_buy = config['cryptocom_max_decimals_buy']
@@ -33,6 +36,7 @@ class CorecitoAccount:
       binance = Binance(public_key = self.api_key, secret_key = self.api_secret, sync=True)
       self.account = binance.b
       self.pair = config['binance_trading_pair']
+      self.pair_name = self.pair.replace('_', '/')
       self.base_currency = config['binance_base_currency']
       self.core_number_currency = config['binance_core_number_currency']
       self.max_decimals_buy = config['binance_max_decimals_buy']

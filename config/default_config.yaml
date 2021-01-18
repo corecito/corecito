@@ -9,6 +9,9 @@ api_secret: <your Crypto.com Exchange or Binance API secret here>
 
 # CORE NUMBER SETTINGS
 core_number: 2 # EUR, ETH, etc...
+# These min and max price_stops are useful to stop corecito from selling or buying all your assets after many small deviations. Un/comment to enable/disable them.
+#min_price_stop: 0.01 # Minimum price at which it stops making transactions.
+#max_price_stop: 0.05 # Maximum price at which it stops making transactions.
 min_core_number_increase_percentage: 3
 max_core_number_increase_percentage: 10
 min_core_number_decrease_percentage: 3

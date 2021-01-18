@@ -11,6 +11,18 @@ class Logger:
   def info(self, msg, *args, **kwargs):
     self.logger.info(msg, *args, **kwargs)
 
+  def logPriceExploded(self, price, max_price_stop, trading_pair, telegram):
+    log_message = f'>> {trading_pair} price exploded to {price:.6f}, exceeding the max price to stop corecito {max_price_stop:.6f}'
+    self.logger.info(log_message)
+    if telegram and telegram.notifications_on:
+      telegram.send(log_message)
+
+  def logPricePlummeted(self, price, min_price_stop, trading_pair, telegram):
+    log_message = f'>> {trading_pair} price plummeted to {price:.6f}, below the min price to stop corecito {min_price_stop:.6f}'
+    self.logger.info(log_message)
+    if telegram and telegram.notifications_on:
+      telegram.send(log_message)
+
   def logCoreNumberExploded(self, increase_percentage, deviated_core_number, telegram):
     log_message = f'> Exploded {increase_percentage:.2f}%\nConsider updating CoreNumber to {deviated_core_number:.6f}'
     self.logger.info(log_message)
