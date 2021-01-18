@@ -63,6 +63,12 @@ class Logger:
     log_message = f'> Price is rock-solid stable ({increase_percentage:.2f}%)'
     self.logger.info(log_message)
 
+  def logException(self, exception, config, telegram):
+    log_message = "Exception occurred -> '{}'. Waiting for next iteration... ({} seconds)\n\n\n".format(exception, config['seconds_between_iterations'])
+    self.logger.info(log_message)
+    if telegram and telegram.notifications_on and telegram.notify_errors_on:
+      telegram.send(log_message)
+
 
 def setupLogger(log_filename):
   logger = logging.getLogger('CN')
