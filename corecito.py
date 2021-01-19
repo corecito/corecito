@@ -5,6 +5,7 @@ import logging
 import yaml
 import sys
 import traceback
+import requests
 from os.path import exists
 import cryptocom.exchange as cro
 from corecito_account import CorecitoAccount
@@ -26,75 +27,99 @@ async def main():
       ticker = await account.get_tickers()
       buy_price = float(ticker["buy_price"])
       sell_price = float(ticker["sell_price"])
-      logger.info(f'\nMarket {account.pair}\nbuy price: {buy_price} - sell price: {sell_price}\n')
+      # logger.info(f'\nMarket {account.pair}\nbuy price: {buy_price} - sell price: {sell_price}\n')
 
       # Get my base and Core Number currency balances
       balances = await account.get_balances()
 
-      logger.info(f"Balances\n(Base) {account.base_currency} balance:{balances['base_currency_balance']} \n(Core) {account.core_number_currency} balance:{balances['core_number_currency_balance']}\n")
+      # logger.info(f"Balances\n(Base) {account.base_currency} balance:{balances['base_currency_balance']} \n(Core) {account.core_number_currency} balance:{balances['core_number_currency_balance']}\n")
 
 
       ###########################
       # Core Number Adjustments #
       ###########################
       deviated_core_number = balances['base_currency_available'] / buy_price
-      logger.info(f'Core number adjustments')
-      logger.info(f'Core number: {account.core_number} {account.core_number_currency}')
-      logger.info(f'Deviated Core number:{deviated_core_number:.6f} {account.core_number_currency}')
+      # logger.info(f'Core number adjustments')
+      # logger.info(f'Core number: {account.core_number} {account.core_number_currency}')
+      # logger.info(f'Deviated Core number:{deviated_core_number:.6f} {account.core_number_currency}')
       excess = round(deviated_core_number - account.core_number, account.max_decimals_buy)
       increase_percentage = excess * 100 / account.core_number
       missing = round(account.core_number - deviated_core_number, account.max_decimals_sell)
       decrease_percentage = missing * 100 / account.core_number
 
       if coreNumberExploded(account.core_number, deviated_core_number, account.max_core_number_increase_percentage):
+        logger.info(f'------------ Iteration {iteration} ------------')
         logger.info(f'> Exploded {increase_percentage:.2f}%\nConsider updating CoreNumber to {deviated_core_number:.6f}')
+        if config['telegram_notifications_on']:
+          telegram_bot_sendtext(config['telegram_bot_token'], config['telegram_user_id'], f'<Corecito> Exploded {increase_percentage:.2f}%\nConsider updating CoreNumber to {deviated_core_number:.6f}')
+        logger.info(f'------------ End Iteration {iteration} ------------')
 
       elif coreNumberIncreased(account.core_number, deviated_core_number, account.min_core_number_increase_percentage, account.max_core_number_increase_percentage):
+        logger.info(f'------------ Iteration {iteration} ------------')
         logger.info(f'Increased {increase_percentage:.2f}% - excess of {excess:.6f} {account.core_number_currency} denominated in {account.base_currency}')
         tx_result = round(excess * buy_price, account.max_decimals_buy)
         logger.info(f'\n\n>>> Selling: {tx_result:.6f} {account.base_currency} at {buy_price} to park an excess of {excess:.6f} {account.core_number_currency}\n')
         # Sell excess of base currency ie. => in ETH_BTC pair, sell excess BTC => Buy ETH
         if (not config['safe_mode_on']):
           await account.order_market_buy(tx_result, excess)
+          if config['telegram_notifications_on']:
+            telegram_bot_sendtext(config['telegram_bot_token'], config['telegram_user_id'], f'<Corecito> Selling: {tx_result:.6f} {account.base_currency} at {buy_price} to park an excess of {excess:.6f} {account.core_number_currency}\n')
+          # Update balances after adjusting to core number
+          balances = await account.get_balances()
+          logger.info(f"Final {account.base_currency} available:{balances['base_currency_available']} - {account.core_number_currency} available:{balances['core_number_currency_available']}")
+          if config['telegram_notifications_on']:
+            telegram_bot_sendtext(config['telegram_bot_token'], config['telegram_user_id'], f"<Corecito> Final {account.base_currency} available:{balances['base_currency_available']} - {account.core_number_currency} available:{balances['core_number_currency_available']}")
+          logger.info(f'------------ End Iteration {iteration} ------------')
 
       elif coreNumberDecreased(account.core_number, deviated_core_number, account.min_core_number_decrease_percentage, account.max_core_number_decrease_percentage):
+        logger.info(f'------------ Iteration {iteration} ------------')
         logger.info(f'Decreased {decrease_percentage:.2f}% - missing {missing:.6f} {account.core_number_currency} denominated in {account.base_currency}')
         tx_result = missing * sell_price
         logger.info(f'\n\n>>> Buying: {tx_result:.6f} {account.base_currency} at {buy_price} taking {missing:.6f} {account.core_number_currency} from reserves\n')
         # Buy missing base currency; ie. => in ETH_BTC pair, buy missing BTC => Sell ETH
         if (not config['safe_mode_on']):
           await account.order_market_sell(missing)
+          if config['telegram_notifications_on']:
+            telegram_bot_sendtext(config['telegram_bot_token'], config['telegram_user_id'], f'<Corecito> Buying: {tx_result:.6f} {account.base_currency} at {buy_price} taking {missing:.6f} {account.core_number_currency} from reserves\n')
+          # Update balances after adjusting to core number
+          balances = await account.get_balances()
+          logger.info(f"Final {account.base_currency} available:{balances['base_currency_available']} - {account.core_number_currency} available:{balances['core_number_currency_available']}")
+          if config['telegram_notifications_on']:
+            telegram_bot_sendtext(config['telegram_bot_token'], config['telegram_user_id'], f"<Corecito> Final {account.base_currency} available:{balances['base_currency_available']} - {account.core_number_currency} available:{balances['core_number_currency_available']}")
+          logger.info(f'------------ End Iteration {iteration} ------------')
 
       elif coreNumberPlummeted(account.core_number, deviated_core_number, account.max_core_number_decrease_percentage):
+        logger.info(f'------------ Iteration {iteration} ------------')
         logger.info(f'> Plummeted {decrease_percentage:.2f}%\nConsider updating CoreNumber to {deviated_core_number:.6f}')
+        if config['telegram_notifications_on']:
+          telegram_bot_sendtext(config['telegram_bot_token'], config['telegram_user_id'], f'<Corecito> Plummeted {decrease_percentage:.2f}%\nConsider updating CoreNumber to {deviated_core_number:.6f}')
+        logger.info(f'------------ End Iteration {iteration} ------------')
 
       else:
-        logger.info(f'> Price is rock-solid stable ({increase_percentage:.2f}%)')
+        print(f'> Price is rock-solid stable ({increase_percentage:.2f}%)')
+        # logger.info(f'> Price is rock-solid stable ({increase_percentage:.2f}%)')
 
-      # Update balances after adjusting to core number
-      balances = await account.get_balances()
-      logger.info(f"Final {account.base_currency} available:{balances['base_currency_available']} - {account.core_number_currency} available:{balances['core_number_currency_available']}")
 
       # Loop end
-      print(f'------------ Iteration {iteration} ------------\n')
+      print(f'------------ End of Iteration {iteration} ------------\n')
       if config['test_mode_on']:
         await asyncio.sleep(1)
         break
       else:
         # Wait given seconds until next poll
-        logger.info("Waiting for next iteration... ({} seconds)\n\n\n".format(config['seconds_between_iterations']))
+        print("Waiting for next iteration... ({} seconds)\n\n\n".format(config['seconds_between_iterations']))
         await asyncio.sleep(config['seconds_between_iterations'])
 
     except Exception as e:
       # Network issue(s) occurred (most probably). Jumping to next iteration
       if config['test_mode_on']:
         logger.info("Exception occurred -> '{}'.\n\n\n".format(e))
-        print(traceback.format_exc())
+        logger.info(traceback.format_exc())
         await asyncio.sleep(1)
         break
       else:
         logger.info("Exception occurred -> '{}'. Waiting for next iteration... ({} seconds)\n\n\n".format(e, config['seconds_between_iterations']))
-        print(traceback.format_exc())
+        logger.info(traceback.format_exc())
         await asyncio.sleep(config['seconds_between_iterations'])
 
 def get_config():
@@ -162,6 +187,12 @@ def setupLogger(log_filename):
 
   logger.setLevel('DEBUG')
   return logger
+
+def telegram_bot_sendtext(bot_token, bot_chatID, bot_message):
+  send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + str(bot_chatID) + '&parse_mode=Markdown&text=' + bot_message
+  response = requests.get(send_text)
+
+  return response.json()
 
 
 
