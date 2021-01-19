@@ -20,6 +20,17 @@ For Telegram notifications, you'll also need to enable it in the config (set 'te
 
 Be careful! -> Do not set your API keys in default_config.yaml and push the file to git!
 
+## Docker
+Docker allows you to set up your enviroment without having to install all dependencies.
+To run corecito using docker:
+- Install [docker](https://docs.docker.com/get-docker/)
+- Install [docker-compose](https://docs.docker.com/compose/install/)
+- Run:
+```
+docker-compose build
+docker run corecito_app:latest python corecito.py
+```
+
 ## Known issues
 
 * INVALID_NONCE On All Requests: the issue occurs when the system clock of the client machine is greater than 1 second in the future, or 30 seconds in the past. Usually, re-syncing with the NTP time server on the client machine will correct the issue.
