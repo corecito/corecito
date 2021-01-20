@@ -1,0 +1,11 @@
+language: python
+python:
+  - 3.8
+before_install:
+  - pip install --upgrade pip
+install:
+  - pip install pyyaml==5.4
+  - pip install cryptocom.exchange==0.7.8
+  - pip install python-binance==0.7.9
+  - pip install pytest==6.2.1
+script: pytest
