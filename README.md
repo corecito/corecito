@@ -9,6 +9,7 @@
 pip3 install cryptocom.exchange
 pip3 install python-binance
 pip3 install pyyaml
+pip3 install pytest
 ```
 
 For Telegram notifications, you'll also need to enable it in the config (set 'telegram_notifications_on' to True) and provide 'telegram_bot_token' and 'telegram_user_id' ([how to create your Telegram bot](https://medium.com/@ManHay_Hong/how-to-create-a-telegram-bot-and-send-messages-with-python-4cf314d9fa3e))
@@ -20,6 +21,12 @@ For Telegram notifications, you'll also need to enable it in the config (set 'te
 
 Be careful! -> Do not set your API keys in default_config.yaml and push the file to git!
 
+## Tests
+To run the tests, execute:
+```
+pytest
+```
+
 ## Docker
 Docker allows you to set up your enviroment without having to install all dependencies.
 To run corecito using docker:
@@ -29,6 +36,11 @@ To run corecito using docker:
 ```
 docker-compose build
 docker run corecito_app:latest python corecito.py
+```
+
+To run the tests using docker run:
+```
+docker run corecito_app:latest pytest
 ```
 
 ## Known issues
