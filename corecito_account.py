@@ -8,39 +8,39 @@ from binance.client import Client
 
 class CorecitoAccount:
   """Configures and runs the right code based on the selected exchange in config"""
-  def __init__(self, config=None):
-    self.exchange = config['corecito_exchange']
-    self.api_key = config['api_key']
-    self.api_secret = config['api_secret']
-    self.core_number = config['core_number']
-    self.min_price_stop = config['min_price_stop'] if 'min_price_stop' in config else None
-    self.max_price_stop = config['max_price_stop'] if 'max_price_stop' in config else None
-    self.min_core_number_increase_percentage = config['min_core_number_increase_percentage']
-    self.max_core_number_increase_percentage = config['max_core_number_increase_percentage']
-    self.min_core_number_decrease_percentage = config['min_core_number_decrease_percentage']
-    self.max_core_number_decrease_percentage = config['max_core_number_decrease_percentage']
-    self.is_fiat = config['is_fiat']
+  def __init__(self, config):
+    self.exchange = config.get('corecito_exchange')
+    self.api_key = config.get('api_key')
+    self.api_secret = config.get('api_secret')
+    self.core_number = config.get('core_number')
+    self.min_price_stop = config.get('min_price_stop')
+    self.max_price_stop = config.get('max_price_stop')
+    self.min_core_number_increase_percentage = config.get('min_core_number_increase_percentage')
+    self.max_core_number_increase_percentage = config.get('max_core_number_increase_percentage')
+    self.min_core_number_decrease_percentage = config.get('min_core_number_decrease_percentage')
+    self.max_core_number_decrease_percentage = config.get('max_core_number_decrease_percentage')
+    self.is_fiat = config.get('is_fiat')
 
     if self.exchange == 'crypto.com':
       self.account = cro.Account(api_key=self.api_key, api_secret=self.api_secret)
       self.cro_exchange = cro.Exchange()
-      self.base_currency = config['cryptocom_base_currency']
-      self.core_number_currency = config['cryptocom_core_number_currency']
-      self.pair = eval('cro.pairs.' + config['cryptocom_trading_pair'])
+      self.base_currency = config.get('cryptocom_base_currency')
+      self.core_number_currency = config.get('cryptocom_core_number_currency')
+      self.pair = eval('cro.pairs.' + config.get('cryptocom_trading_pair'))
       self.pair_name = self.pair.name.replace('_', '/')
-      self.cro_coin_base_currency = eval('cro.coins.' + config['cryptocom_base_currency'])
-      self.cro_coin_core_number_currency = eval('cro.coins.' + config['cryptocom_core_number_currency'])
-      self.max_decimals_buy = config['cryptocom_max_decimals_buy']
-      self.max_decimals_sell = config['cryptocom_max_decimals_sell']
+      self.cro_coin_base_currency = eval('cro.coins.' + config.get('cryptocom_base_currency'))
+      self.cro_coin_core_number_currency = eval('cro.coins.' + config.get('cryptocom_core_number_currency'))
+      self.max_decimals_buy = config.get('cryptocom_max_decimals_buy')
+      self.max_decimals_sell = config.get('cryptocom_max_decimals_sell')
     elif self.exchange == 'binance':
       binance = Binance(public_key = self.api_key, secret_key = self.api_secret, sync=True)
       self.account = binance.b
-      self.pair = config['binance_trading_pair']
+      self.pair = config.get('binance_trading_pair')
       self.pair_name = self.pair.replace('_', '/')
-      self.base_currency = config['binance_base_currency']
-      self.core_number_currency = config['binance_core_number_currency']
-      self.max_decimals_buy = config['binance_max_decimals_buy']
-      self.max_decimals_sell = config['binance_max_decimals_sell']
+      self.base_currency = config.get('binance_base_currency')
+      self.core_number_currency = config.get('binance_core_number_currency')
+      self.max_decimals_buy = config.get('binance_max_decimals_buy')
+      self.max_decimals_sell = config.get('binance_max_decimals_sell')
 
     if not self.account:
       raise Exception('Could not connect to the exchange account with provided keys!')

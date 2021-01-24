@@ -4,14 +4,14 @@ import requests
 
 class Telegram:
   """Configures Telegram object with info from the provided config"""
-  def __init__(self, config=None):
+  def __init__(self, config):
     self.url = 'https://api.telegram.org/bot'
     self.action = '/sendMessage?chat_id='
     self.params = '&parse_mode=Markdown&text='
-    self.bot_token = config['telegram_bot_token']
-    self.bot_chatId = config['telegram_user_id']
-    self.notifications_on = config['telegram_notifications_on']
-    self.notify_errors_on = config['telegram_notify_errors']
+    self.bot_token = config.get('telegram_bot_token')
+    self.bot_chatId = config.get('telegram_user_id')
+    self.notifications_on = config.get('telegram_notifications_on')
+    self.notify_errors_on = config.get('telegram_notify_errors')
 
 
   def send(self, bot_message):

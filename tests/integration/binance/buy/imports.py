@@ -8,3 +8,4 @@ import sys
 sys.path.append(".")
 import corecito
 from corecito_account import CorecitoAccount
+from config import Config
