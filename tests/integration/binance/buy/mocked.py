@@ -31,16 +31,16 @@ class Mocked:
     "core_number_currency_available": 0
   }
 
-  def config_for_test_core_deviated_sell_excess():
+  def config_for_test_core_deviated_sell_excess(self, file_path):
     return Mocked.config
 
-  def config_for_test_price_rock_solid_do_not_sell():
+  def config_for_test_price_rock_solid_do_not_sell(self, file_path):
     return Mocked.config
 
-  def config_for_test_exceeded_max_price_do_not_sell():
+  def config_for_test_exceeded_max_price_do_not_sell(self, file_path):
     return Mocked.config
 
-  def config_for_test_exceeded_max_core_number_increase_percentage_do_not_sell():
+  def config_for_test_exceeded_max_core_number_increase_percentage_do_not_sell(self, file_path):
     config = Mocked.config
     config["max_price_stop"] = 13000
     return config

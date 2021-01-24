@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 import asyncio
-import yaml
-import sys
 import traceback
-from os.path import exists
 import cryptocom.exchange as cro
+from config import Config
 from corecito_account import CorecitoAccount
 from telegram import Telegram
 from logger import Logger
 
 async def main():
-  config = get_config()
+  config = Config()
 
-  logger = Logger(config['corecito_exchange'])
+  logger = Logger(config.get('corecito_exchange'))
 
   account = CorecitoAccount(config=config)
   logger.logger.info(f'Working on {account.exchange.capitalize()} Exchange\n')
@@ -21,7 +19,7 @@ async def main():
 
   iteration = 0
 
-  fiat = config['is_fiat']
+  fiat = config.get('is_fiat')
 
   tx_price = 0
 
@@ -82,7 +80,7 @@ async def main():
 
         # Sell excess of base currency ie. => in ETH_BTC pair, sell excess BTC => Buy ETH
         # If fiat, we sell the value previously calculated and stored on tx_result
-        if (not config['safe_mode_on']):
+        if (not config.get('safe_mode_on')):
           if fiat:
             await account.order_market_sell(tx_result)
           else:
@@ -101,7 +99,7 @@ async def main():
         logger.logBuyMissing(tx_result, account.base_currency, tx_price, missing, account.core_number_currency, telegram)
 
         # Buy missing base currency; ie. => in ETH_BTC pair, buy missing BTC => Sell ETH
-        if (not config['safe_mode_on']):
+        if (not config.get('safe_mode_on')):
           if fiat:
             await account.order_market_buy(missing, tx_result)
           else:
@@ -120,17 +118,17 @@ async def main():
 
       # Loop end
       print(f'------------ Iteration {iteration} ------------\n')
-      if config['test_mode_on']:
+      if config.get('test_mode_on'):
         await asyncio.sleep(1)
         break
       else:
         # Wait given seconds until next poll
-        logger.info("Waiting for next iteration... ({} seconds)\n\n\n".format(config['seconds_between_iterations']))
-        await asyncio.sleep(config['seconds_between_iterations'])
+        logger.info("Waiting for next iteration... ({} seconds)\n\n\n".format(config.get('seconds_between_iterations')))
+        await asyncio.sleep(config.get('seconds_between_iterations'))
 
     except Exception as e:
       # Network issue(s) occurred (most probably). Jumping to next iteration
-      if config['test_mode_on']:
+      if config.get('test_mode_on'):
         logger.info("Exception occurred -> '{}'.\n\n\n".format(e))
         print(traceback.format_exc())
         await asyncio.sleep(1)
@@ -138,38 +136,7 @@ async def main():
       else:
         logger.logException(e, config, telegram)
         print(traceback.format_exc())
-        await asyncio.sleep(config['seconds_between_iterations'])
-
-def get_config():
-  config_path = "config/default_config.yaml"
-  if exists("config/user_config.yaml"):
-    config_path = "config/user_config.yaml"
-    print('\n\nDetected user configuration...\n')
-  else:
-    print('Loading default configuration...')
-  config_file = open(config_path)
-  data = yaml.load(config_file, Loader=yaml.FullLoader)
-  config_file.close()
-  if data['corecito_exchange'] == 'crypto.com':
-    check_config(data)
-  return data
-
-def check_config(data):
-  try:
-    eval('cro.pairs.' + data['cryptocom_trading_pair'])
-  except AttributeError:
-    print('Trading pair "{}" does not exist (check your config_file)'.format(data['cryptocom_trading_pair']))
-    sys.exit(1)
-  try:
-    eval('cro.coins.' + data['cryptocom_core_number_currency'])
-  except AttributeError:
-    print('Currency "{}" does not exist (check your config_file)'.format(data['cryptocom_core_number_currency']))
-    sys.exit(1)
-  try:
-    eval('cro.coins.' + data['cryptocom_base_currency'])
-  except AttributeError:
-    print('Currency "{}" does not exist (check your config_file)'.format(data['cryptocom_base_currency']))
-    sys.exit(1)
+        await asyncio.sleep(config.get('seconds_between_iterations'))
 
 def pricePlummeted(price, min_price_stop):
   if min_price_stop is None:

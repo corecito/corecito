@@ -4,8 +4,9 @@ import logging
 class Logger:
   """Handles everything that has to do with logging, telegram notifications, etc"""
   def __init__(self, exchange=''):
+    exchange_str = '_'
     if exchange:
-      exchange_str = '-' + exchange
+      exchange_str += exchange
     self.logger = setupLogger('logfile' + exchange_str + '.log')
 
   def info(self, msg, *args, **kwargs):
@@ -64,7 +65,7 @@ class Logger:
     self.logger.info(log_message)
 
   def logException(self, exception, config, telegram):
-    log_message = "Exception occurred -> '{}'. Waiting for next iteration... ({} seconds)\n\n\n".format(exception, config['seconds_between_iterations'])
+    log_message = "Exception occurred -> '{}'. Waiting for next iteration... ({} seconds)\n\n\n".format(exception, config.get('seconds_between_iterations'))
     self.logger.info(log_message)
     if telegram and telegram.notifications_on and telegram.notify_errors_on:
       telegram.send(log_message)

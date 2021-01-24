@@ -11,7 +11,7 @@ class TestSell:
 
 
   def test_core_deviated_sell_excess(self, monkeypatch):
-    monkeypatch.setattr(corecito, "get_config", Mocked.config_for_test_core_deviated_sell_excess)
+    monkeypatch.setattr(Config, "load_config_file", Mocked.config_for_test_core_deviated_sell_excess)
     monkeypatch.setattr(CorecitoAccount, "get_tickers", Mocked.get_tickers_for_test_core_deviated_sell_excess)
     monkeypatch.setattr(CorecitoAccount, "get_balances", Mocked.get_balances_for_test_core_deviated_sell_excess)
 
@@ -38,7 +38,7 @@ class TestSell:
 
 
   def test_price_rock_solid_do_not_sell(self, monkeypatch):
-    monkeypatch.setattr(corecito, "get_config", Mocked.config_for_test_price_rock_solid_do_not_sell)
+    monkeypatch.setattr(Config, "load_config_file", Mocked.config_for_test_price_rock_solid_do_not_sell)
     monkeypatch.setattr(CorecitoAccount, "get_tickers", Mocked.get_tickers_for_test_price_rock_solid_do_not_sell)
     monkeypatch.setattr(CorecitoAccount, "get_balances", Mocked.get_balances_for_test_price_rock_solid_do_not_sell)
 
@@ -65,7 +65,7 @@ class TestSell:
 
 
   def test_exceeded_max_price_do_not_sell(self, monkeypatch):
-    monkeypatch.setattr(corecito, "get_config", Mocked.config_for_test_exceeded_max_price_do_not_sell)
+    monkeypatch.setattr(Config, "load_config_file", Mocked.config_for_test_exceeded_max_price_do_not_sell)
     monkeypatch.setattr(CorecitoAccount, "get_tickers", Mocked.get_tickers_for_test_exceeded_max_price_do_not_sell)
     monkeypatch.setattr(CorecitoAccount, "get_balances", Mocked.get_balances_for_test_exceeded_max_price_do_not_sell)
 
@@ -90,7 +90,7 @@ class TestSell:
     assert "Selling:" not in log_output
 
   def test_exceeded_max_core_number_increase_percentage_do_not_sell(self, monkeypatch):
-    monkeypatch.setattr(corecito, "get_config", Mocked.config_for_test_exceeded_max_core_number_increase_percentage_do_not_sell)
+    monkeypatch.setattr(Config, "load_config_file", Mocked.config_for_test_exceeded_max_core_number_increase_percentage_do_not_sell)
     monkeypatch.setattr(CorecitoAccount, "get_tickers", Mocked.get_tickers_for_test_exceeded_max_core_number_increase_percentage_do_not_sell)
     monkeypatch.setattr(CorecitoAccount, "get_balances", Mocked.get_balances_for_test_exceeded_max_core_number_increase_percentage_do_not_sell)
 
