@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 import asyncio
 import time
+import hmac
+import random
+import hashlib
 import cryptocom.exchange as cro
+from cryptocom.exchange.api import ApiProvider
 from cryptocom.exchange.structs import Pair
 from cryptocom.exchange.structs import PrivateTrade
 from binance.client import Client
@@ -22,7 +26,7 @@ class CorecitoAccount:
     self.is_fiat = config['is_fiat']
 
     if self.exchange == 'crypto.com':
-      self.account = cro.Account(api_key=self.api_key, api_secret=self.api_secret)
+      self.account = cro.Account(api=CryptoApiProvider(api_key=self.api_key, api_secret=self.api_secret))
       self.cro_exchange = cro.Exchange()
       self.base_currency = config['cryptocom_base_currency']
       self.core_number_currency = config['cryptocom_core_number_currency']
@@ -118,3 +122,29 @@ class Binance:
 
   def synced(self, fn_name, **args):
     args['timestamp'] = int(time.time() - self.time_offset)
+
+# This wrapper solves time-offset inconsistencies between local-PC time and Crypto server time by removing 5 secs from local time
+class CryptoApiProvider(ApiProvider):
+  def _sign(self, path, data):
+      data = data or {}
+      data['method'] = path
+
+      sign_time = int(time.time() * 1000) - 5000
+      data.update({'nonce': sign_time, 'api_key': self.api_key})
+
+      data['id'] = random.randint(1000, 10000)
+      data_params = data.get('params', {})
+      params = ''.join(
+          f'{key}{data_params[key]}'
+          for key in sorted(data_params)
+      )
+
+      payload = f"{path}{data['id']}" \
+          f"{self.api_key}{params}{data['nonce']}"
+
+      data['sig'] = hmac.new(
+          self.api_secret.encode('utf-8'),
+          payload.encode('utf-8'),
+          hashlib.sha256
+      ).hexdigest()
+      return data
